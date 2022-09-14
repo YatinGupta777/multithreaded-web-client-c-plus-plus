@@ -141,28 +141,42 @@ void crawl(Parameters*p, char* link) {
         EnterCriticalSection(&hostCriticalSection);
         auto host_check = p->seen_hosts.insert(host);
         LeaveCriticalSection(&hostCriticalSection);
-
+        
         printf("\tChecking host uniqueness...");
 
-        if (true)
+        if (host_check.second == true)
         {
+            EnterCriticalSection(&statsCriticalSection);
+            p->unique_hosts++;
+            LeaveCriticalSection(&statsCriticalSection);
             printf("passed\n");
             WebScrapping obj;
             DWORD IP;
             obj.DNS_LOOKUP(host, port, IP);
-            printf("\tChecking IP uniqueness...");
+            
             if (!obj.error) {
+
+                EnterCriticalSection(&statsCriticalSection);
+                p->dns_lookups++;
+                LeaveCriticalSection(&statsCriticalSection);
+
+                printf("\tChecking IP uniqueness...");
                 EnterCriticalSection(&ipCriticalSection);
                 auto ip_result = p->seen_IP.insert(IP);
                 LeaveCriticalSection(&ipCriticalSection);
-                if (ip_result.second == false)
+
+                if (ip_result.second == true)
                 {
+                    EnterCriticalSection(&statsCriticalSection);
+                    p->unique_ips++;
+                    LeaveCriticalSection(&statsCriticalSection);
+                    printf("passed\n");
+                }
+                else {
                     printf("failed\n");
                     obj.error = true;
-                }
+                }   
             }
-            printf("passed\n");
-
             if (!obj.error) obj.head_request(port, host, head_path, head_query, original_link);
             if (!obj.error) obj.get_request(port, host, path, query, original_link);
             if (!obj.error) obj.parse_response(original_link);
@@ -222,13 +236,17 @@ UINT stats_thread(LPVOID pParam)
 
         EnterCriticalSection(&statsCriticalSection);
         int extracted_urls = p->extracted_urls;
+        int unique_hosts = p->unique_hosts;
+        int dns_lookups = p->dns_lookups;
+        int unique_ips = p->unique_ips;
+
         LeaveCriticalSection(&statsCriticalSection);
 
-        printf("[%3d] %d Q %d E %3d\n", elapsed_time/1000, active_threads, size, extracted_urls);
+        printf("[%3d] %d Q %d E %3d H%3d D%3d I%3d\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips);
        
        // Sleep(200);
     }
-
+     
     printf("DONE\n");
 
     return 0;
