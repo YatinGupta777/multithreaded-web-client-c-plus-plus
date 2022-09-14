@@ -30,7 +30,7 @@ void WebScrapping::cleanup(HANDLE event, SOCKET sock)
 	closesocket(sock);
 }
 
-void WebScrapping::DNS_LOOKUP(char* host, int port, std::set<DWORD>seen_IP) {
+void WebScrapping::DNS_LOOKUP(char* host, int port, DWORD& IP) {
 	start_t = clock();
 	printf("\tDoing DNS... ");
 
@@ -38,7 +38,7 @@ void WebScrapping::DNS_LOOKUP(char* host, int port, std::set<DWORD>seen_IP) {
 	struct hostent* remote;
 
 	// first assume that the string is an IP address
-	DWORD IP = inet_addr(host);
+	IP = inet_addr(host);
 	if (IP == INADDR_NONE)
 	{
 		// if not a valid IP, then do a DNS lookup
@@ -58,17 +58,6 @@ void WebScrapping::DNS_LOOKUP(char* host, int port, std::set<DWORD>seen_IP) {
 	}
 	end_t = clock();
 	printf("done in %d ms, found %s\n", (end_t - start_t), inet_ntoa(server.sin_addr));
-
-	printf("\tChecking IP uniqueness...");
-	auto ip_result = seen_IP.insert(IP);
-
-	if (ip_result.second == false)
-	{
-		printf("failed\n");
-		error = true;
-		return;
-	}
-	printf("passed\n");
 	
 	// setup the port # and protocol type
 	server.sin_family = AF_INET;

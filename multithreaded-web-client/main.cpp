@@ -12,7 +12,9 @@
 using namespace std;
 
 class WebScrapping;
-CRITICAL_SECTION CriticalSection;
+CRITICAL_SECTION queueCriticalSection;
+CRITICAL_SECTION hostCriticalSection;
+CRITICAL_SECTION ipCriticalSection;
 
 class Parameters {
 public:
@@ -113,9 +115,9 @@ void crawl(set<DWORD>& seen_IP, set<string>& seen_hosts, char* link) {
     bool success = clean_url(fragment, query, path, port_string, port, host, link);
     if (success) {
 
-        EnterCriticalSection(&CriticalSection);
+        EnterCriticalSection(&hostCriticalSection);
         auto host_check = seen_hosts.insert(host);
-        LeaveCriticalSection(&CriticalSection);
+        LeaveCriticalSection(&hostCriticalSection);
 
         printf("\tChecking host uniqueness...");
 
@@ -123,7 +125,20 @@ void crawl(set<DWORD>& seen_IP, set<string>& seen_hosts, char* link) {
         {
             printf("passed\n");
             WebScrapping obj;
-            obj.DNS_LOOKUP(host, port, seen_IP);
+            DWORD IP;
+            obj.DNS_LOOKUP(host, port, IP);
+            printf("\tChecking IP uniqueness...");
+            if (!obj.error) {
+                EnterCriticalSection(&ipCriticalSection);
+                auto ip_result = seen_IP.insert(IP);
+                LeaveCriticalSection(&ipCriticalSection);
+                if (ip_result.second == false)
+                {
+                    printf("failed\n");
+                    obj.error = true;
+                }
+            }
+            printf("passed\n");
 
             if (!obj.error) obj.head_request(port, host, head_path, head_query, original_link);
             if (!obj.error) obj.get_request(port, host, path, query, original_link);
@@ -149,16 +164,15 @@ UINT crawling_thread(LPVOID pParam)
 
     while (true)
     {
-        EnterCriticalSection(&CriticalSection);
+        EnterCriticalSection(&queueCriticalSection);
         if (p->links.size() == 0) {
-            LeaveCriticalSection(&CriticalSection);
+            LeaveCriticalSection(&queueCriticalSection);
             return 0;
         }
         char* link = p->links.front();
         p->links.pop();
-        //printf("%s", link);
-        printf("threadA %d started\n", GetCurrentThreadId());
-        LeaveCriticalSection(&CriticalSection);
+        printf("thread %d started\n", GetCurrentThreadId());
+        LeaveCriticalSection(&queueCriticalSection);
         crawl(p->seen_IP, p->seen_hosts, link);
     }
 
@@ -214,8 +228,10 @@ int main(int argc, char** argv)
             return 0;  
         }
         handles = new HANDLE[threads];
-        if (!InitializeCriticalSectionAndSpinCount(&CriticalSection,
-            0x00000400))
+        if (!InitializeCriticalSectionAndSpinCount(&queueCriticalSection,
+            0x00000400) || !InitializeCriticalSectionAndSpinCount(&hostCriticalSection,
+                0x00000400) || !InitializeCriticalSectionAndSpinCount(&ipCriticalSection,
+                    0x00000400))
             return 0;
         char* filename = argv[2];
         bool error = read_links_from_file(filename, links);
@@ -250,9 +266,9 @@ int main(int argc, char** argv)
         CloseHandle(handles[i]);
     }
 
-   DeleteCriticalSection(&CriticalSection);
-
-   // crawl(links, seen_IP, seen_hosts);
+   DeleteCriticalSection(&queueCriticalSection);
+   DeleteCriticalSection(&hostCriticalSection);
+   DeleteCriticalSection(&ipCriticalSection);
     
     WSACleanup();
 }
