@@ -26,7 +26,7 @@ char* extract_and_truncate(char* link, char c)
     return result;
 }
 
-bool read_links_from_file(char* filename, vector<char*>&links) {
+bool read_links_from_file(char* filename, queue<char*>&links) {
  
     ifstream file(filename);
     string line;
@@ -39,7 +39,7 @@ bool read_links_from_file(char* filename, vector<char*>&links) {
     while (getline(file, line)) {
         char* temp = new char[line.length() + 1];
         strcpy(temp, line.c_str());
-        links.push_back(temp);
+        links.push(temp);
     }
 
     //Getting file size
@@ -57,13 +57,13 @@ bool read_links_from_file(char* filename, vector<char*>&links) {
 
 int main(int argc, char** argv)
 {
-    vector<char*>links;
+    queue<char*>links;
     set<DWORD> seen_IP;
     set<string> seen_hosts;
 
     if (argc == 2) {
         char* a = argv[1];
-        links.push_back(a);
+        links.push(a);
     }
     else if (argc == 3)
     {
@@ -95,9 +95,10 @@ int main(int argc, char** argv)
     }
 
     int n = links.size();
-    for (int i = 0; i < n; i++)
+    while(!links.empty())
     {
-        char* link = links[i];
+        char* link = links.front();
+        links.pop();
         
         if (strlen(link) > MAX_URL_LEN) {
             printf("URL length exceeds the maximum allowed length %d\n", MAX_URL_LEN);
