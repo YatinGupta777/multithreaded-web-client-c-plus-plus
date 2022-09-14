@@ -34,77 +34,6 @@ public:
     HANDLE	eventQuit;
 };
 
-char* extract_and_truncate(char* link, char c)
-{
-    char* result = NULL;
-    char* temp = strchr(link, c);
-    if (temp != NULL) {
-        int length = strlen(temp) + 1;
-        result = new char[length];
-        strcpy_s(result, length, temp);
-        *temp = '\0';
-    }
-    return result;
-}
-
-bool clean_url(char *&fragment, char *&query, char *&path, char *&port_string, int& port, char  *&host, char* link)
-{
-    if (strlen(link) > MAX_URL_LEN) {
-        printf("URL length exceeds the maximum allowed length %d\n", MAX_URL_LEN);
-        return false;
-    }
-
-    printf("URL: %s\n", link);
-    printf("\tParsing URL... ");
-    if (strncmp(link, "http://", 7) != 0)
-    {
-        printf("failed with invalid scheme\n");
-        return false;
-    }
-
-    host = link;
-    host += 7;
-
-    fragment = extract_and_truncate(host, '#');
-    query = extract_and_truncate(host, '?');
-    path = extract_and_truncate(host, '/');
-    port_string = extract_and_truncate(host, ':');
-
-    port = 80;
-
-    if (port_string != NULL)
-    {
-        port = atoi(port_string + 1);
-        if (port == 0)
-        {
-            printf("failed with invalid port\n");
-            return false;
-        }
-    }
-    if (path == NULL) {
-        int length = 2;
-        path = new char[length];
-        strcpy_s(path, length, "/");
-    };
-    if (query == NULL) {
-        int length = 2;
-        query = new char[length];
-        strcpy_s(query, length, "");
-    };
-
-    if (strlen(host) > MAX_HOST_LEN) {
-        printf("host length exceeds the maximum allowed length %d\n", MAX_HOST_LEN);
-        return false;
-    }
-
-    printf("host %s, port %d", host, port);
-    printf(", request %s%s", path, query);
-    printf("\n");
-
-    return true;
-}
-
-
 void crawl(Parameters*p, char* link) {
    
     WebScrapping obj;
@@ -124,7 +53,7 @@ void crawl(Parameters*p, char* link) {
     char* head_query = new char[2];
     strcpy_s(head_query, 2, "");
 
-    bool success = clean_url(fragment, query, path, port_string, port, host, link);
+    bool success = obj.clean_url(fragment, query, path, port_string, port, host, link);
     if (success) {
 
         EnterCriticalSection(&statsCriticalSection);

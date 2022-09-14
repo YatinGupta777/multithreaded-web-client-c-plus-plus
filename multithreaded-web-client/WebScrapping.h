@@ -25,4 +25,5 @@ public:
 	void DNS_LOOKUP(char* host, int port, DWORD& IP);
 	int parse_response(char* link);
 	void read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr_pos, int max_size);
+	bool clean_url(char*& fragment, char*& query, char*& path, char*& port_string, int& port, char*& host, char* link);
 };

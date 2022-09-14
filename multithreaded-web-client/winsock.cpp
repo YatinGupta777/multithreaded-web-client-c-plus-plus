@@ -65,6 +65,78 @@ void WebScrapping::DNS_LOOKUP(char* host, int port, DWORD& IP) {
 	server.sin_port = htons(port);		// host-to-network flips the byte order
 }
 
+
+char* extract_and_truncate(char* link, char c)
+{
+	char* result = NULL;
+	char* temp = strchr(link, c);
+	if (temp != NULL) {
+		int length = strlen(temp) + 1;
+		result = new char[length];
+		strcpy_s(result, length, temp);
+		*temp = '\0';
+	}
+	return result;
+}
+
+bool WebScrapping::clean_url(char*& fragment, char*& query, char*& path, char*& port_string, int& port, char*& host, char* link)
+{
+	if (strlen(link) > MAX_URL_LEN) {
+		if (print) printf("URL length exceeds the maximum allowed length %d\n", MAX_URL_LEN);
+		return false;
+	}
+
+	if (print) printf("URL: %s\n", link);
+	if (print) printf("\tParsing URL... ");
+	if (strncmp(link, "http://", 7) != 0)
+	{
+		if (print) printf("failed with invalid scheme\n");
+		return false;
+	}
+
+	host = link;
+	host += 7;
+
+	fragment = extract_and_truncate(host, '#');
+	query = extract_and_truncate(host, '?');
+	path = extract_and_truncate(host, '/');
+	port_string = extract_and_truncate(host, ':');
+
+	port = 80;
+
+	if (port_string != NULL)
+	{
+		port = atoi(port_string + 1);
+		if (port == 0)
+		{
+			if (print) printf("failed with invalid port\n");
+			return false;
+		}
+	}
+	if (path == NULL) {
+		int length = 2;
+		path = new char[length];
+		strcpy_s(path, length, "/");
+	};
+	if (query == NULL) {
+		int length = 2;
+		query = new char[length];
+		strcpy_s(query, length, "");
+	};
+
+	if (strlen(host) > MAX_HOST_LEN) {
+		if (print) printf("host length exceeds the maximum allowed length %d\n", MAX_HOST_LEN);
+		return false;
+	}
+	
+	if(print) printf("host %s, port %d", host, port);
+	if(print) printf(", request %s%s", path, query);
+	if(print) printf("\n");
+
+	return true;
+}
+
+
 void WebScrapping::read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr_pos, int max_size) {
 	WSANETWORKEVENTS network_events;
 
