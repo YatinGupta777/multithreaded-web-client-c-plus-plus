@@ -13,34 +13,13 @@ using namespace std;
 
 class WebScrapping;
 CRITICAL_SECTION CriticalSection;
+
 class Parameters {
 public:
     queue<char*> links;
+    set<DWORD> seen_IP;
+    set<string> seen_hosts;
 };
-
-UINT crawling_thread(LPVOID pParam)
-{
-    Parameters* p = ((Parameters*)pParam);
-
-    while (true)
-    {
-        EnterCriticalSection(&CriticalSection);
-        if (p->links.size() == 0) {
-            LeaveCriticalSection(&CriticalSection);
-            return 0;
-        }
-        char* link = p->links.front();
-        string t = link;
-        char* temp = new char[t.length() + 1];
-        strcpy(temp, t.c_str());
-        p->links.pop();
-        
-        printf("threadA %d started\n", GetCurrentThreadId());
-        LeaveCriticalSection(&CriticalSection);
-    }
-
-    return 0;
-}
 
 char* extract_and_truncate(char* link, char c)
 {
@@ -55,36 +34,7 @@ char* extract_and_truncate(char* link, char c)
     return result;
 }
 
-bool read_links_from_file(char* filename, queue<char*>&links) {
- 
-    ifstream file(filename);
-    string line;
-
-    if (!file.is_open()) {
-        printf("Error reading file\n");
-        return true;
-    }
-
-    while (getline(file, line)) {
-        char* temp = new char[line.length() + 1];
-        strcpy(temp, line.c_str());
-        links.push(temp);
-    }
-
-    //Getting file size
-    //TODO: figure out out to get filesize with in one go
-    file.clear();
-    file.seekg(0, ios::end);
-    int file_size = file.tellg();
-
-    printf("Opened %s with size %d\n", filename, file_size);
-
-    file.close();
-
-    return false;
-}
-
-void crawl(queue<char*>&links, set<DWORD>& seen_IP, set<string>& seen_hosts, char* link) {
+void crawl(set<DWORD>& seen_IP, set<string>& seen_hosts, char* link) {
     if (strlen(link) > MAX_URL_LEN) {
         printf("URL length exceeds the maximum allowed length %d\n", MAX_URL_LEN);
     }
@@ -167,11 +117,60 @@ void crawl(queue<char*>&links, set<DWORD>& seen_IP, set<string>& seen_hosts, cha
     delete[] head_query;
 }
 
+UINT crawling_thread(LPVOID pParam)
+{
+    Parameters* p = ((Parameters*)pParam);
+
+    while (true)
+    {
+        EnterCriticalSection(&CriticalSection);
+        if (p->links.size() == 0) {
+            LeaveCriticalSection(&CriticalSection);
+            return 0;
+        }
+        char* link = p->links.front();
+        p->links.pop();
+        //printf("%s", link);
+        crawl(p->seen_IP, p->seen_hosts, link);
+        //printf("threadA %d started\n", GetCurrentThreadId());
+        LeaveCriticalSection(&CriticalSection);
+    }
+
+    return 0;
+}
+
+bool read_links_from_file(char* filename, queue<char*>&links) {
+ 
+    ifstream file(filename);
+    string line;
+
+    if (!file.is_open()) {
+        printf("Error reading file\n");
+        return true;
+    }
+
+    while (getline(file, line)) {
+        char* temp = new char[line.length() + 1];
+        strcpy(temp, line.c_str());
+        links.push(temp);
+    }
+
+    //Getting file size
+    //TODO: figure out out to get filesize with in one go
+    file.clear();
+    file.seekg(0, ios::end);
+    int file_size = file.tellg();
+
+    printf("Opened %s with size %d\n", filename, file_size);
+
+    file.close();
+
+    return false;
+}
+
 int main(int argc, char** argv)
 {
     queue<char*>links;
-    set<DWORD> seen_IP;
-    set<string> seen_hosts;
     HANDLE* handles = NULL;
     int threads;
     Parameters p;
