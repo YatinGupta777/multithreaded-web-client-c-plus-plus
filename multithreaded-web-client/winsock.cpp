@@ -273,7 +273,7 @@ int WebScrapping::get_request(int port, char* host, char* path, char* query, cha
 	return 0;
 }
 
-void  WebScrapping::parse_response(char* link) {
+int  WebScrapping::parse_response(char* link) {
 	
 	char* html_content = strstr(get_buffer, "\r\n\r\n");
 	int html_content_length = 0;
@@ -292,6 +292,7 @@ void  WebScrapping::parse_response(char* link) {
 	start_t = clock();
 	end_t = clock();
 	printf("done in %d ms with %d links\n", (end_t - start_t), nlinks);
+	return nlinks;
 }
 
 //http://tamu.edu/

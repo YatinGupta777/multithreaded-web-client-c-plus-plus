@@ -187,8 +187,10 @@ void crawl(Parameters*p, char* link) {
 
             }
 
-
-            if (!obj.error) obj.parse_response(original_link);
+            if (!obj.error) {
+                int nlinks = obj.parse_response(original_link);
+                p->total_links_found += nlinks;
+            }
         }
         else {
             printf("failed\n");
@@ -249,15 +251,13 @@ UINT stats_thread(LPVOID pParam)
         int dns_lookups = p->dns_lookups;
         int unique_ips = p->unique_ips;
         int crawled_urls = p->status_codes[0];
+        int total_links_found = p->total_links_found;
         LeaveCriticalSection(&statsCriticalSection);
 
-        printf("[%3d] %d Q %d E %3d H %3d D %3d I %3d C %3d\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips, crawled_urls);
-       
-        Sleep(200);
+        printf("[%3d] %d Q %d E %3d H %3d D %3d I %3d C %3d L %3d\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips, crawled_urls, total_links_found);
     }
      
     printf("DONE\n");
-
     printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
 
     return 0;
@@ -350,7 +350,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    HANDLE statsThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
+    HANDLE stats_thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
     p.active_threads = threads;
 
     for (int i = 0; i < threads; i++)
@@ -366,12 +366,8 @@ int main(int argc, char** argv)
 
     SetEvent(p.eventQuit);
 
-    printf("Reach1\n");
-
-    WaitForSingleObject(stats_thread, INFINITE);
-   // CloseHandle(stats_thread);
-
-    printf("Reach2\n");
+    WaitForSingleObject(stats_thread_handle, INFINITE);
+    CloseHandle(stats_thread_handle);
 
    DeleteCriticalSection(&queueCriticalSection);
    DeleteCriticalSection(&hostCriticalSection);

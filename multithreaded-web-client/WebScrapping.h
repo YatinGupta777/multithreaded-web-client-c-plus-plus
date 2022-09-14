@@ -22,6 +22,6 @@ public:
 	void head_request(int port, char* host, char* path, char* query, char* link);
 	int get_request(int port, char* host, char* path, char* query, char* link);
 	void DNS_LOOKUP(char* host, int port, DWORD& IP);
-	void parse_response(char* link);
+	int parse_response(char* link);
 	void read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr_pos, int max_size);
 };
