@@ -12,6 +12,31 @@
 using namespace std;
 
 class WebScrapping;
+CRITICAL_SECTION CriticalSection;
+class Parameters {
+public:
+    HANDLE	mutex;
+    HANDLE	finished;
+    HANDLE	eventQuit;
+};
+
+UINT crawling_thread(LPVOID pParam)
+{
+    Parameters* p = ((Parameters*)pParam);
+
+    // wait for mutex, then print and sleep inside the critical section
+    EnterCriticalSection(&CriticalSection);// lock mutex
+    printf("threadA %d started\n", GetCurrentThreadId());		// print inside critical section to avoid screen garbage
+    Sleep(1000);												// sleep 1 second
+    LeaveCriticalSection(&CriticalSection);									// release critical section
+
+    // print we're about to exit
+    EnterCriticalSection(&CriticalSection);
+    printf("threadA %d quitting on event\n", GetCurrentThreadId());
+    LeaveCriticalSection(&CriticalSection);
+
+    return 0;
+}
 
 char* extract_and_truncate(char* link, char c)
 {
@@ -153,6 +178,9 @@ int main(int argc, char** argv)
     queue<char*>links;
     set<DWORD> seen_IP;
     set<string> seen_hosts;
+    HANDLE* handles = NULL;
+    int threads;
+    Parameters p;
 
     if (argc == 2) {
         char* a = argv[1];
@@ -161,11 +189,15 @@ int main(int argc, char** argv)
     else if (argc == 3)
     {
         char* temp = argv[1];
-        int threads = atoi(temp);
+        threads = atoi(temp);
         if (threads != 1) {
             printf("Please pass only 1 thread and name of file as 2 arguments\n");
             return 0;  
         }
+        handles = new HANDLE[threads];
+        if (!InitializeCriticalSectionAndSpinCount(&CriticalSection,
+            0x00000400))
+            return 0;
         char* filename = argv[2];
         bool error = read_links_from_file(filename, links);
         if(error) return 0;
@@ -187,7 +219,20 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    crawl(links, seen_IP, seen_hosts);
+    for (int i = 0; i < threads; i++)
+    {
+        handles[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)crawling_thread, &p, 0, NULL);
+    }
+    // make sure this thread hangs here until the other three quit; otherwise, the program will terminate prematurely
+    for (int i = 0; i < threads; i++)
+    {
+        WaitForSingleObject(handles[i], INFINITE);
+        CloseHandle(handles[i]);
+    }
+
+   DeleteCriticalSection(&CriticalSection);
+
+   // crawl(links, seen_IP, seen_hosts);
     
     WSACleanup();
 }
