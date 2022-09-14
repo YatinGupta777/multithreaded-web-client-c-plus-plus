@@ -24,7 +24,6 @@ public:
     set<DWORD> seen_IP;
     set<string> seen_hosts;
     int active_threads;
-    bool quit;
     int extracted_urls;
     int unique_hosts;
     int dns_lookups;
@@ -32,6 +31,7 @@ public:
     int robot_checks;
     vector<int>status_codes;
     int total_links_found;
+    HANDLE	eventQuit;
 };
 
 char* extract_and_truncate(char* link, char c)
@@ -233,7 +233,7 @@ UINT stats_thread(LPVOID pParam)
     Parameters* p = ((Parameters*)pParam);
     clock_t start;
     start = clock();
-    while (!p->quit)
+    while (WaitForSingleObject(p->eventQuit, 2000) == WAIT_TIMEOUT)
     {
         EnterCriticalSection(&queueCriticalSection);
         int size = p->links.size();
@@ -258,9 +258,7 @@ UINT stats_thread(LPVOID pParam)
      
     printf("DONE\n");
 
-    EnterCriticalSection(&statsCriticalSection);
     printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
-    LeaveCriticalSection(&statsCriticalSection);
 
     return 0;
 }
@@ -326,7 +324,6 @@ int main(int argc, char** argv)
         bool error = read_links_from_file(filename, links);
         if(error) return 0;
         p.links = links;
-        p.quit = false;
         p.extracted_urls = 0;
         p.unique_hosts = 0;
         p.dns_lookups = 0;
@@ -334,7 +331,7 @@ int main(int argc, char** argv)
         p.robot_checks = 0;
         p.total_links_found = 0;
         p.status_codes = { 0,0,0,0,0 };
-
+        p.eventQuit = CreateEvent(NULL, true, false, NULL);
     }
     else {
         printf("Please pass only URL in format -> scheme://host[:port][/path][?query][#fragment]\n");
@@ -367,7 +364,7 @@ int main(int argc, char** argv)
         CloseHandle(handles[i]);
     }
 
-    p.quit = true;
+    SetEvent(p.eventQuit);
 
     printf("Reach1\n");
 
