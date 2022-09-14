@@ -181,7 +181,7 @@ SOCKET WebScrapping::connect_socket(char* host, int port, const char* method) {
 	return sock;
 }
 
-void WebScrapping::connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &curr_pos, int max_size)
+int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &curr_pos, int max_size)
 {
 	start_t = clock();
 
@@ -192,7 +192,7 @@ void WebScrapping::connect_and_parse(char*& buffer, int port, const char* method
 
 	SOCKET sock = connect_socket(host, port, method);
 
-	if (error) return;
+	if (error) return 0;
 
 	int send_request = send(sock, request, (int)strlen(request), 0);
 
@@ -201,7 +201,7 @@ void WebScrapping::connect_and_parse(char*& buffer, int port, const char* method
 	if (send_request == SOCKET_ERROR) {
 		printf("socket failed with %d\n", WSAGetLastError());
 		error = true;
-		return;
+		return 0;
 	}
 
 	printf("\tLoading... ");
@@ -214,7 +214,7 @@ void WebScrapping::connect_and_parse(char*& buffer, int port, const char* method
 		closesocket(sock);
 		WSACleanup();
 		error = true;
-		return;
+		return 0;
 	}	
 
 	int event_select = WSAEventSelect(sock, event, FD_READ | FD_CLOSE);
@@ -222,13 +222,13 @@ void WebScrapping::connect_and_parse(char*& buffer, int port, const char* method
 		printf("event failed with %d\n", WSAGetLastError());
 		cleanup(event, sock);
 		error = true;
-		return;
+		return 0;
 	}
 
 	read_data(event, sock, buffer, curr_pos, max_size);
 	cleanup(event, sock);
 
-	if (error) return;
+	if (error) return 0;
 
 	buffer[curr_pos] = '\0';
 	end_t = clock();
@@ -239,7 +239,7 @@ void WebScrapping::connect_and_parse(char*& buffer, int port, const char* method
 	{
 		printf("failed with non HTTP-header\n");
 		error = true;
-		return;
+		return 0;
 	}
 
 	char status_code_string[4];
@@ -251,23 +251,26 @@ void WebScrapping::connect_and_parse(char*& buffer, int port, const char* method
 	{
 		printf("failed with invalid status code\n");
 		error = true;
-		return;
+		return 0;
 	}
 
 	printf("status code %d\n", status_code);
 
 	if (status_code < status_code_validation || status_code >= status_code_validation + 100) {
 		error = true;
-		return;
+		return 0;
 	}
+
+	return status_code;
 }
 
 void WebScrapping::head_request(int port, char* host, char* path, char* query, char* link) {
 	if(!error) connect_and_parse(head_buffer, port, "HEAD", host, path, query, link, 400, head_buffer_size, 16000);
 }
 
-void WebScrapping::get_request(int port, char* host, char* path, char* query, char* link) {
-	if (!error) connect_and_parse(get_buffer, port, "GET", host, path, query, link, 200, get_buffer_size, 2000000);
+int WebScrapping::get_request(int port, char* host, char* path, char* query, char* link) {
+	if (!error) return connect_and_parse(get_buffer, port, "GET", host, path, query, link, 200, get_buffer_size, 2000000);
+	return 0;
 }
 
 void  WebScrapping::parse_response(char* link) {

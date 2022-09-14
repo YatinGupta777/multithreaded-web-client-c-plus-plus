@@ -123,14 +123,6 @@ void crawl(Parameters*p, char* link) {
     char* head_query = new char[2];
     strcpy_s(head_query, 2, "");
 
-    int extracted_urls;
-    int unique_hosts;
-    int dns_lookups;
-    int unique_ips;
-    int robot_checks;
-    vector<int>status_codes;
-    int total_links_found;
-
     bool success = clean_url(fragment, query, path, port_string, port, host, link);
     if (success) {
 
@@ -178,7 +170,24 @@ void crawl(Parameters*p, char* link) {
                 }   
             }
             if (!obj.error) obj.head_request(port, host, head_path, head_query, original_link);
-            if (!obj.error) obj.get_request(port, host, path, query, original_link);
+
+            EnterCriticalSection(&statsCriticalSection);
+            p->robot_checks++;
+            LeaveCriticalSection(&statsCriticalSection);
+
+            if (!obj.error) {
+                int code = obj.get_request(port, host, path, query, original_link);
+                EnterCriticalSection(&statsCriticalSection);
+                if (code >= 200 && code < 300) p->status_codes[0]++;
+                else if (code >= 300 && code < 400) p->status_codes[1]++;
+                if (code >= 400 && code < 500) p->status_codes[2]++;
+                if (code >= 500 && code < 600) p->status_codes[3]++;
+                else p->status_codes[4]++;
+                LeaveCriticalSection(&statsCriticalSection);
+
+            }
+
+
             if (!obj.error) obj.parse_response(original_link);
         }
         else {
@@ -239,15 +248,19 @@ UINT stats_thread(LPVOID pParam)
         int unique_hosts = p->unique_hosts;
         int dns_lookups = p->dns_lookups;
         int unique_ips = p->unique_ips;
-
+        int crawled_urls = p->status_codes[0];
         LeaveCriticalSection(&statsCriticalSection);
 
-        printf("[%3d] %d Q %d E %3d H%3d D%3d I%3d\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips);
+        printf("[%3d] %d Q %d E %3d H %3d D %3d I %3d C %3d\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips, crawled_urls);
        
-       // Sleep(200);
+        Sleep(200);
     }
      
     printf("DONE\n");
+
+    EnterCriticalSection(&statsCriticalSection);
+    printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
+    LeaveCriticalSection(&statsCriticalSection);
 
     return 0;
 }
