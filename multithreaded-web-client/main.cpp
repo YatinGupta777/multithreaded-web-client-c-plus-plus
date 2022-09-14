@@ -55,51 +55,12 @@ bool read_links_from_file(char* filename, queue<char*>&links) {
     return false;
 }
 
-int main(int argc, char** argv)
-{
-    queue<char*>links;
-    set<DWORD> seen_IP;
-    set<string> seen_hosts;
-
-    if (argc == 2) {
-        char* a = argv[1];
-        links.push(a);
-    }
-    else if (argc == 3)
-    {
-        char* temp = argv[1];
-        int threads = atoi(temp);
-        if (threads != 1) {
-            printf("Please pass only 1 thread and name of file as 2 arguments\n");
-            return 0;  
-        }
-        char* filename = argv[2];
-        bool error = read_links_from_file(filename, links);
-        if(error) return 0;
-    }
-    else {
-        printf("Please pass only URL in format -> scheme://host[:port][/path][?query][#fragment]\n");
-        printf("OR\n");
-        printf("Please pass only 1 thread and name of file as 2 arguments\n");
-        return 0;
-    }
-
-    WSADATA wsaData;
-
-    //Initialize WinSock; once per program run 
-    WORD wVersionRequested = MAKEWORD(2, 2);
-    if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-        printf("WSAStartup failed with %d\n", WSAGetLastError());
-        WSACleanup();
-        return 0;
-    }
-
-    int n = links.size();
-    while(!links.empty())
+void crawl(queue<char*>&links, set<DWORD>& seen_IP, set<string>& seen_hosts) {
+    while (!links.empty())
     {
         char* link = links.front();
         links.pop();
-        
+
         if (strlen(link) > MAX_URL_LEN) {
             printf("URL length exceeds the maximum allowed length %d\n", MAX_URL_LEN);
             continue;
@@ -152,7 +113,7 @@ int main(int argc, char** argv)
         }
 
         printf("host %s, port %d", host, port);
-        if(argc==2) printf(", request %s%s", path, query);
+        printf(", request %s%s", path, query);
         printf("\n");
 
         char* head_path = new char[12];
@@ -185,6 +146,49 @@ int main(int argc, char** argv)
         delete[] head_path;
         delete[] head_query;
     }
+}
+
+int main(int argc, char** argv)
+{
+    queue<char*>links;
+    set<DWORD> seen_IP;
+    set<string> seen_hosts;
+
+    if (argc == 2) {
+        char* a = argv[1];
+        links.push(a);
+    }
+    else if (argc == 3)
+    {
+        char* temp = argv[1];
+        int threads = atoi(temp);
+        if (threads != 1) {
+            printf("Please pass only 1 thread and name of file as 2 arguments\n");
+            return 0;  
+        }
+        char* filename = argv[2];
+        bool error = read_links_from_file(filename, links);
+        if(error) return 0;
+    }
+    else {
+        printf("Please pass only URL in format -> scheme://host[:port][/path][?query][#fragment]\n");
+        printf("OR\n");
+        printf("Please pass only 1 thread and name of file as 2 arguments\n");
+        return 0;
+    }
+
+    WSADATA wsaData;
+
+    //Initialize WinSock; once per program run 
+    WORD wVersionRequested = MAKEWORD(2, 2);
+    if (WSAStartup(wVersionRequested, &wsaData) != 0) {
+        printf("WSAStartup failed with %d\n", WSAGetLastError());
+        WSACleanup();
+        return 0;
+    }
+
+    crawl(links, seen_IP, seen_hosts);
+    
     WSACleanup();
 }
 
