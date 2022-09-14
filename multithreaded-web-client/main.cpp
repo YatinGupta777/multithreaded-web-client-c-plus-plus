@@ -187,6 +187,7 @@ UINT stats_thread(LPVOID pParam)
         int unique_hosts = p->unique_hosts;
         int dns_lookups = p->dns_lookups;
         int unique_ips = p->unique_ips;
+        int robot_checks = p->robot_checks;
         int crawled_urls = p->status_codes[0];
         int total_links_found = p->total_links_found;
         int pages = p->pages;
@@ -198,11 +199,18 @@ UINT stats_thread(LPVOID pParam)
         small_end = clock();
         int d = (small_end - small_start) / 1000;
 
-        printf("[%3d] %d Q %d E %3d H %3d D %3d I %3d C %3d L %3d\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips, crawled_urls, total_links_found);
+        printf("[%3d] %d Q %d E %3d H %3d D %3d I %3d R %3d C %3d L %3d\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips, robot_checks, crawled_urls, total_links_found);
         printf("*** pages %d bytes %d crawling %d pps @ %d Mbps\n", pages, bytes, pages / d, ((bytes/1000000)*8)/ d);
         small_start = clock();
     }
-     
+
+    int elapsed_time = clock() - start;
+
+    printf("Extracted %d URLS @ %d/s\n", p->extracted_urls, p->extracted_urls / elapsed_time);
+    printf("Looked up %d DNS names @ %d/s\n", p->dns_lookups, p->dns_lookups / elapsed_time);
+    printf("Attempted %d robots @ %d/s\n", p->robot_checks, p->robot_checks / elapsed_time);
+    printf("Crawled %d pages @ %d/s\n", p->status_codes[0], p->status_codes[0] / elapsed_time);
+    printf("Parsed %d links @ %d/s\n", p->total_links_found, p->total_links_found / elapsed_time);
     printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
 
     return 0;
