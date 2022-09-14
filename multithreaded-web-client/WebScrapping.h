@@ -16,6 +16,7 @@ public:
 	clock_t start_t;
 	clock_t end_t;
 	bool error;
+	bool print;
 	void cleanup(HANDLE event, SOCKET sock);
 	int connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &buffer_size, int max_size);
 	SOCKET connect_socket(char* host, int port, const char* method);

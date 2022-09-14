@@ -107,6 +107,7 @@ bool clean_url(char *&fragment, char *&query, char *&path, char *&port_string, i
 
 void crawl(Parameters*p, char* link) {
    
+    WebScrapping obj;
     int length = strlen(link) + 1;
     char* original_link = new char[length];
     strcpy_s(original_link, length, link);
@@ -134,15 +135,14 @@ void crawl(Parameters*p, char* link) {
         auto host_check = p->seen_hosts.insert(host);
         LeaveCriticalSection(&hostCriticalSection);
         
-        printf("\tChecking host uniqueness...");
+        if(obj.print) printf("\tChecking host uniqueness...");
 
         if (host_check.second == true)
         {
             EnterCriticalSection(&statsCriticalSection);
             p->unique_hosts++;
             LeaveCriticalSection(&statsCriticalSection);
-            printf("passed\n");
-            WebScrapping obj;
+            if (obj.print) printf("passed\n");
             DWORD IP;
             obj.DNS_LOOKUP(host, port, IP);
             
@@ -152,7 +152,7 @@ void crawl(Parameters*p, char* link) {
                 p->dns_lookups++;
                 LeaveCriticalSection(&statsCriticalSection);
 
-                printf("\tChecking IP uniqueness...");
+                if (obj.print) printf("\tChecking IP uniqueness...");
                 EnterCriticalSection(&ipCriticalSection);
                 auto ip_result = p->seen_IP.insert(IP);
                 LeaveCriticalSection(&ipCriticalSection);
@@ -162,10 +162,10 @@ void crawl(Parameters*p, char* link) {
                     EnterCriticalSection(&statsCriticalSection);
                     p->unique_ips++;
                     LeaveCriticalSection(&statsCriticalSection);
-                    printf("passed\n");
+                    if (obj.print) printf("passed\n");
                 }
                 else {
-                    printf("failed\n");
+                    if (obj.print) printf("failed\n");
                     obj.error = true;
                 }   
             }
@@ -184,7 +184,6 @@ void crawl(Parameters*p, char* link) {
                 if (code >= 500 && code < 600) p->status_codes[3]++;
                 else if(code != -1) p->status_codes[4]++;
                 LeaveCriticalSection(&statsCriticalSection);
-
             }
 
             if (!obj.error) {
@@ -193,7 +192,7 @@ void crawl(Parameters*p, char* link) {
             }
         }
         else {
-            printf("failed\n");
+            if (obj.print) printf("failed\n");
         }
     }
 
@@ -222,7 +221,6 @@ UINT crawling_thread(LPVOID pParam)
         }
         char* link = p->links.front();
         p->links.pop();
-        printf("thread %d started\n", GetCurrentThreadId());
         LeaveCriticalSection(&queueCriticalSection);
         crawl(p, link);
     }
