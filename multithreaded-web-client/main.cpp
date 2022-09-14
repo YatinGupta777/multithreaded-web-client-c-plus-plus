@@ -32,6 +32,8 @@ public:
     vector<int>status_codes;
     int total_links_found;
     HANDLE	eventQuit;
+    int pages;
+    int bytes;
 };
 
 void crawl(Parameters*p, char* link) {
@@ -98,7 +100,12 @@ void crawl(Parameters*p, char* link) {
                     obj.error = true;
                 }   
             }
-            if (!obj.error) obj.head_request(port, host, head_path, head_query, original_link);
+            if (!obj.error) {
+                obj.head_request(port, host, head_path, head_query, original_link);
+                EnterCriticalSection(&statsCriticalSection);
+                p->bytes += obj.head_buffer_size;
+                LeaveCriticalSection(&statsCriticalSection);
+            }
 
             EnterCriticalSection(&statsCriticalSection);
             p->robot_checks++;
@@ -112,6 +119,8 @@ void crawl(Parameters*p, char* link) {
                 if (code >= 400 && code < 500) p->status_codes[2]++;
                 if (code >= 500 && code < 600) p->status_codes[3]++;
                 else if(code != -1) p->status_codes[4]++;
+                p->pages++;
+                p->bytes += obj.get_buffer_size;
                 LeaveCriticalSection(&statsCriticalSection);
             }
 
@@ -160,8 +169,9 @@ UINT crawling_thread(LPVOID pParam)
 UINT stats_thread(LPVOID pParam)
 {
     Parameters* p = ((Parameters*)pParam);
-    clock_t start;
+    clock_t start, small_start, small_end;
     start = clock();
+    small_start = clock();
     while (WaitForSingleObject(p->eventQuit, 2000) == WAIT_TIMEOUT)
     {
         EnterCriticalSection(&queueCriticalSection);
@@ -179,12 +189,20 @@ UINT stats_thread(LPVOID pParam)
         int unique_ips = p->unique_ips;
         int crawled_urls = p->status_codes[0];
         int total_links_found = p->total_links_found;
+        int pages = p->pages;
+        int bytes = p->bytes;
+        p->pages = 0;
+        p->bytes = 0;
         LeaveCriticalSection(&statsCriticalSection);
 
+        small_end = clock();
+        int d = (small_end - small_start) / 1000;
+
         printf("[%3d] %d Q %d E %3d H %3d D %3d I %3d C %3d L %3d\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips, crawled_urls, total_links_found);
+        printf("*** pages %d bytes %d crawling %d pps @ %d Mbps\n", pages, bytes, pages / d, ((bytes/1000000)*8)/ d);
+        small_start = clock();
     }
      
-    printf("DONE\n");
     printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
 
     return 0;
@@ -258,6 +276,7 @@ int main(int argc, char** argv)
         p.robot_checks = 0;
         p.total_links_found = 0;
         p.status_codes = { 0,0,0,0,0 };
+        p.pages = 0;
         p.eventQuit = CreateEvent(NULL, true, false, NULL);
     }
     else {
