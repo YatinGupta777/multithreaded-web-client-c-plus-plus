@@ -131,9 +131,9 @@ UINT crawling_thread(LPVOID pParam)
         char* link = p->links.front();
         p->links.pop();
         //printf("%s", link);
-        crawl(p->seen_IP, p->seen_hosts, link);
-        //printf("threadA %d started\n", GetCurrentThreadId());
+        printf("threadA %d started\n", GetCurrentThreadId());
         LeaveCriticalSection(&CriticalSection);
+        crawl(p->seen_IP, p->seen_hosts, link);
     }
 
     return 0;
@@ -183,8 +183,8 @@ int main(int argc, char** argv)
     {
         char* temp = argv[1];
         threads = atoi(temp);
-        if (threads != 1) {
-            printf("Please pass only 1 thread and name of file as 2 arguments\n");
+        if (threads < 1) {
+            printf("Please pass valid number of threads and name of file as 2 arguments\n");
             return 0;  
         }
         handles = new HANDLE[threads];
