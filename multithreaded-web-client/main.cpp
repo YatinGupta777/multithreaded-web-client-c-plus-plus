@@ -16,6 +16,7 @@ CRITICAL_SECTION queueCriticalSection;
 CRITICAL_SECTION hostCriticalSection;
 CRITICAL_SECTION ipCriticalSection;
 CRITICAL_SECTION activeThreadsCriticalSection;
+CRITICAL_SECTION statsCriticalSection;
 
 class Parameters {
 public:
@@ -24,6 +25,13 @@ public:
     set<string> seen_hosts;
     int active_threads;
     bool quit;
+    int extracted_urls;
+    int unique_hosts;
+    int dns_lookups;
+    int unique_ips;
+    int robot_checks;
+    vector<int>status_codes;
+    int total_links_found;
 };
 
 char* extract_and_truncate(char* link, char c)
@@ -97,7 +105,7 @@ bool clean_url(char *&fragment, char *&query, char *&path, char *&port_string, i
 }
 
 
-void crawl(set<DWORD>& seen_IP, set<string>& seen_hosts, char* link) {
+void crawl(Parameters*p, char* link) {
    
     int length = strlen(link) + 1;
     char* original_link = new char[length];
@@ -115,11 +123,23 @@ void crawl(set<DWORD>& seen_IP, set<string>& seen_hosts, char* link) {
     char* head_query = new char[2];
     strcpy_s(head_query, 2, "");
 
+    int extracted_urls;
+    int unique_hosts;
+    int dns_lookups;
+    int unique_ips;
+    int robot_checks;
+    vector<int>status_codes;
+    int total_links_found;
+
     bool success = clean_url(fragment, query, path, port_string, port, host, link);
     if (success) {
 
+        EnterCriticalSection(&statsCriticalSection);
+        p->extracted_urls++;
+        LeaveCriticalSection(&statsCriticalSection);
+
         EnterCriticalSection(&hostCriticalSection);
-        auto host_check = seen_hosts.insert(host);
+        auto host_check = p->seen_hosts.insert(host);
         LeaveCriticalSection(&hostCriticalSection);
 
         printf("\tChecking host uniqueness...");
@@ -133,7 +153,7 @@ void crawl(set<DWORD>& seen_IP, set<string>& seen_hosts, char* link) {
             printf("\tChecking IP uniqueness...");
             if (!obj.error) {
                 EnterCriticalSection(&ipCriticalSection);
-                auto ip_result = seen_IP.insert(IP);
+                auto ip_result = p->seen_IP.insert(IP);
                 LeaveCriticalSection(&ipCriticalSection);
                 if (ip_result.second == false)
                 {
@@ -179,7 +199,7 @@ UINT crawling_thread(LPVOID pParam)
         p->links.pop();
         printf("thread %d started\n", GetCurrentThreadId());
         LeaveCriticalSection(&queueCriticalSection);
-        crawl(p->seen_IP, p->seen_hosts, link);
+        crawl(p, link);
     }
 
     return 0;
@@ -199,7 +219,12 @@ UINT stats_thread(LPVOID pParam)
         EnterCriticalSection(&activeThreadsCriticalSection);
         int active_threads = p->active_threads;
         LeaveCriticalSection(&activeThreadsCriticalSection);
-        printf("active_threads: %d, size %d time %d\n", active_threads, size, elapsed_time/1000);
+
+        EnterCriticalSection(&statsCriticalSection);
+        int extracted_urls = p->extracted_urls;
+        LeaveCriticalSection(&statsCriticalSection);
+
+        printf("[%3d] %d Q %d E %3d\n", elapsed_time/1000, active_threads, size, extracted_urls);
        
        // Sleep(200);
     }
@@ -245,8 +270,6 @@ int main(int argc, char** argv)
     int threads;
     Parameters p;
 
-    p.quit = false;
-
     if (argc == 2) {
         char* a = argv[1];
         links.push(a);
@@ -264,12 +287,23 @@ int main(int argc, char** argv)
             0x00000400) || !InitializeCriticalSectionAndSpinCount(&hostCriticalSection,
                 0x00000400) || !InitializeCriticalSectionAndSpinCount(&ipCriticalSection,
                     0x00000400) || !InitializeCriticalSectionAndSpinCount(&activeThreadsCriticalSection,
-                        0x00000400))
+                        0x00000400) || !InitializeCriticalSectionAndSpinCount(&statsCriticalSection,
+                            0x00000400))
             return 0;
+        
         char* filename = argv[2];
         bool error = read_links_from_file(filename, links);
         if(error) return 0;
         p.links = links;
+        p.quit = false;
+        p.extracted_urls = 0;
+        p.unique_hosts = 0;
+        p.dns_lookups = 0;
+        p.unique_ips = 0;
+        p.robot_checks = 0;
+        p.total_links_found = 0;
+        p.status_codes = { 0,0,0,0,0 };
+
     }
     else {
         printf("Please pass only URL in format -> scheme://host[:port][/path][?query][#fragment]\n");
@@ -314,8 +348,9 @@ int main(int argc, char** argv)
    DeleteCriticalSection(&queueCriticalSection);
    DeleteCriticalSection(&hostCriticalSection);
    DeleteCriticalSection(&ipCriticalSection);
-   DeleteCriticalSection(&activeThreadsCriticalSection);
-   
+   DeleteCriticalSection(&activeThreadsCriticalSection); 
+   DeleteCriticalSection(&statsCriticalSection);
+
    WSACleanup();
 }
 
