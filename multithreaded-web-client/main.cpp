@@ -15,25 +15,29 @@ class WebScrapping;
 CRITICAL_SECTION CriticalSection;
 class Parameters {
 public:
-    HANDLE	mutex;
-    HANDLE	finished;
-    HANDLE	eventQuit;
+    queue<char*> links;
 };
 
 UINT crawling_thread(LPVOID pParam)
 {
     Parameters* p = ((Parameters*)pParam);
 
-    // wait for mutex, then print and sleep inside the critical section
-    EnterCriticalSection(&CriticalSection);// lock mutex
-    printf("threadA %d started\n", GetCurrentThreadId());		// print inside critical section to avoid screen garbage
-    Sleep(1000);												// sleep 1 second
-    LeaveCriticalSection(&CriticalSection);									// release critical section
-
-    // print we're about to exit
-    EnterCriticalSection(&CriticalSection);
-    printf("threadA %d quitting on event\n", GetCurrentThreadId());
-    LeaveCriticalSection(&CriticalSection);
+    while (true)
+    {
+        EnterCriticalSection(&CriticalSection);
+        if (p->links.size() == 0) {
+            LeaveCriticalSection(&CriticalSection);
+            return 0;
+        }
+        char* link = p->links.front();
+        string t = link;
+        char* temp = new char[t.length() + 1];
+        strcpy(temp, t.c_str());
+        p->links.pop();
+        
+        printf("threadA %d started\n", GetCurrentThreadId());
+        LeaveCriticalSection(&CriticalSection);
+    }
 
     return 0;
 }
@@ -80,97 +84,87 @@ bool read_links_from_file(char* filename, queue<char*>&links) {
     return false;
 }
 
-void crawl(queue<char*>&links, set<DWORD>& seen_IP, set<string>& seen_hosts) {
-    while (!links.empty())
-    {
-        char* link = links.front();
-        links.pop();
-
-        if (strlen(link) > MAX_URL_LEN) {
-            printf("URL length exceeds the maximum allowed length %d\n", MAX_URL_LEN);
-            continue;
-        }
-
-        printf("URL: %s\n", link);
-        printf("\tParsing URL... ");
-        if (strncmp(link, "http://", 7) != 0)
-        {
-            printf("failed with invalid scheme\n");
-            continue;
-        }
-
-        int length = strlen(link) + 1;
-        char* original_link = new char[length];
-        strcpy_s(original_link, length, link);
-        char* host = link;
-        host += 7;
-
-        char* fragment = extract_and_truncate(host, '#');
-        char* query = extract_and_truncate(host, '?');
-        char* path = extract_and_truncate(host, '/');
-        char* port_string = extract_and_truncate(host, ':');
-
-        int port = 80;
-
-        if (port_string != NULL)
-        {
-            port = atoi(port_string + 1);
-            if (port == 0)
-            {
-                printf("failed with invalid port\n");
-                continue;
-            }
-        }
-        if (path == NULL) {
-            int length = 2;
-            path = new char[length];
-            strcpy_s(path, length, "/");
-        };
-        if (query == NULL) {
-            int length = 2;
-            query = new char[length];
-            strcpy_s(query, length, "");
-        };
-
-        if (strlen(host) > MAX_HOST_LEN) {
-            printf("host length exceeds the maximum allowed length %d\n", MAX_HOST_LEN);
-            continue;
-        }
-
-        printf("host %s, port %d", host, port);
-        printf(", request %s%s", path, query);
-        printf("\n");
-
-        char* head_path = new char[12];
-        strcpy_s(head_path, 12, "/robots.txt");
-        char* head_query = new char[2];
-        strcpy_s(head_query, 2, "");
-        auto host_check = seen_hosts.insert(host);
-
-        printf("\tChecking host uniqueness...");
-
-        if (host_check.second == true)
-        {
-            printf("passed\n");
-            WebScrapping obj;
-            obj.DNS_LOOKUP(host, port, seen_IP);
-
-            if (!obj.error) obj.head_request(port, host, head_path, head_query, original_link);
-            if (!obj.error) obj.get_request(port, host, path, query, original_link);
-            if (!obj.error) obj.parse_response(original_link);
-        }
-        else {
-            printf("failed\n");
-        }
-
-        delete[] fragment;
-        delete[] query;
-        delete[] path;
-        delete[] port_string;
-        delete[] original_link;
-        delete[] head_path;
-        delete[] head_query;
+void crawl(queue<char*>&links, set<DWORD>& seen_IP, set<string>& seen_hosts, char* link) {
+    if (strlen(link) > MAX_URL_LEN) {
+        printf("URL length exceeds the maximum allowed length %d\n", MAX_URL_LEN);
     }
+
+    printf("URL: %s\n", link);
+    printf("\tParsing URL... ");
+    if (strncmp(link, "http://", 7) != 0)
+    {
+        printf("failed with invalid scheme\n");
+    }
+
+    int length = strlen(link) + 1;
+    char* original_link = new char[length];
+    strcpy_s(original_link, length, link);
+    char* host = link;
+    host += 7;
+
+    char* fragment = extract_and_truncate(host, '#');
+    char* query = extract_and_truncate(host, '?');
+    char* path = extract_and_truncate(host, '/');
+    char* port_string = extract_and_truncate(host, ':');
+
+    int port = 80;
+
+    if (port_string != NULL)
+    {
+        port = atoi(port_string + 1);
+        if (port == 0)
+        {
+            printf("failed with invalid port\n");
+        }
+    }
+    if (path == NULL) {
+        int length = 2;
+        path = new char[length];
+        strcpy_s(path, length, "/");
+    };
+    if (query == NULL) {
+        int length = 2;
+        query = new char[length];
+        strcpy_s(query, length, "");
+    };
+
+    if (strlen(host) > MAX_HOST_LEN) {
+        printf("host length exceeds the maximum allowed length %d\n", MAX_HOST_LEN);
+    }
+
+    printf("host %s, port %d", host, port);
+    printf(", request %s%s", path, query);
+    printf("\n");
+
+    char* head_path = new char[12];
+    strcpy_s(head_path, 12, "/robots.txt");
+    char* head_query = new char[2];
+    strcpy_s(head_query, 2, "");
+    auto host_check = seen_hosts.insert(host);
+
+    printf("\tChecking host uniqueness...");
+
+    if (host_check.second == true)
+    {
+        printf("passed\n");
+        WebScrapping obj;
+        obj.DNS_LOOKUP(host, port, seen_IP);
+
+        if (!obj.error) obj.head_request(port, host, head_path, head_query, original_link);
+        if (!obj.error) obj.get_request(port, host, path, query, original_link);
+        if (!obj.error) obj.parse_response(original_link);
+    }
+    else {
+        printf("failed\n");
+    }
+
+    delete[] fragment;
+    delete[] query;
+    delete[] path;
+    delete[] port_string;
+    delete[] original_link;
+    delete[] head_path;
+    delete[] head_query;
 }
 
 int main(int argc, char** argv)
@@ -201,6 +195,7 @@ int main(int argc, char** argv)
         char* filename = argv[2];
         bool error = read_links_from_file(filename, links);
         if(error) return 0;
+        p.links = links;
     }
     else {
         printf("Please pass only URL in format -> scheme://host[:port][/path][?query][#fragment]\n");
