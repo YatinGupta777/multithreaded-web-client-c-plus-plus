@@ -21,6 +21,7 @@ public:
     queue<char*> links;
     set<DWORD> seen_IP;
     set<string> seen_hosts;
+    bool quit;
 };
 
 char* extract_and_truncate(char* link, char c)
@@ -179,6 +180,24 @@ UINT crawling_thread(LPVOID pParam)
     return 0;
 }
 
+UINT stats_thread(LPVOID pParam)
+{
+    Parameters* p = ((Parameters*)pParam);
+
+    while (!p->quit)
+    {
+        EnterCriticalSection(&queueCriticalSection);
+        int size = p->links.size();
+        printf("STATS thread %d size %d\n", GetCurrentThreadId(), size);
+        LeaveCriticalSection(&queueCriticalSection);
+       // Sleep(200);
+    }
+
+    printf("DONE\n");
+
+    return 0;
+}
+
 bool read_links_from_file(char* filename, queue<char*>&links) {
  
     ifstream file(filename);
@@ -214,6 +233,8 @@ int main(int argc, char** argv)
     HANDLE* handles = NULL;
     int threads;
     Parameters p;
+
+    p.quit = false;
 
     if (argc == 2) {
         char* a = argv[1];
@@ -255,6 +276,8 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    HANDLE statsThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
+
     for (int i = 0; i < threads; i++)
     {
         handles[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)crawling_thread, &p, 0, NULL);
@@ -266,10 +289,19 @@ int main(int argc, char** argv)
         CloseHandle(handles[i]);
     }
 
+    p.quit = true;
+
+    printf("Reach1\n");
+
+    WaitForSingleObject(stats_thread, INFINITE);
+   // CloseHandle(stats_thread);
+
+    printf("Reach2\n");
+
    DeleteCriticalSection(&queueCriticalSection);
    DeleteCriticalSection(&hostCriticalSection);
    DeleteCriticalSection(&ipCriticalSection);
     
-    WSACleanup();
+   WSACleanup();
 }
 
