@@ -182,7 +182,7 @@ void crawl(Parameters*p, char* link) {
                 else if (code >= 300 && code < 400) p->status_codes[1]++;
                 if (code >= 400 && code < 500) p->status_codes[2]++;
                 if (code >= 500 && code < 600) p->status_codes[3]++;
-                else p->status_codes[4]++;
+                else if(code != -1) p->status_codes[4]++;
                 LeaveCriticalSection(&statsCriticalSection);
 
             }
