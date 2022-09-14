@@ -15,12 +15,14 @@ class WebScrapping;
 CRITICAL_SECTION queueCriticalSection;
 CRITICAL_SECTION hostCriticalSection;
 CRITICAL_SECTION ipCriticalSection;
+CRITICAL_SECTION activeThreadsCriticalSection;
 
 class Parameters {
 public:
     queue<char*> links;
     set<DWORD> seen_IP;
     set<string> seen_hosts;
+    int active_threads;
     bool quit;
 };
 
@@ -168,6 +170,9 @@ UINT crawling_thread(LPVOID pParam)
         EnterCriticalSection(&queueCriticalSection);
         if (p->links.size() == 0) {
             LeaveCriticalSection(&queueCriticalSection);
+            EnterCriticalSection(&activeThreadsCriticalSection);
+            p->active_threads--;
+            LeaveCriticalSection(&activeThreadsCriticalSection);
             return 0;
         }
         char* link = p->links.front();
@@ -183,13 +188,19 @@ UINT crawling_thread(LPVOID pParam)
 UINT stats_thread(LPVOID pParam)
 {
     Parameters* p = ((Parameters*)pParam);
-
+    clock_t start;
+    start = clock();
     while (!p->quit)
     {
         EnterCriticalSection(&queueCriticalSection);
         int size = p->links.size();
-        printf("STATS thread %d size %d\n", GetCurrentThreadId(), size);
         LeaveCriticalSection(&queueCriticalSection);
+        int elapsed_time = clock() - start;
+        EnterCriticalSection(&activeThreadsCriticalSection);
+        int active_threads = p->active_threads;
+        LeaveCriticalSection(&activeThreadsCriticalSection);
+        printf("active_threads: %d, size %d time %d\n", active_threads, size, elapsed_time/1000);
+       
        // Sleep(200);
     }
 
@@ -252,7 +263,8 @@ int main(int argc, char** argv)
         if (!InitializeCriticalSectionAndSpinCount(&queueCriticalSection,
             0x00000400) || !InitializeCriticalSectionAndSpinCount(&hostCriticalSection,
                 0x00000400) || !InitializeCriticalSectionAndSpinCount(&ipCriticalSection,
-                    0x00000400))
+                    0x00000400) || !InitializeCriticalSectionAndSpinCount(&activeThreadsCriticalSection,
+                        0x00000400))
             return 0;
         char* filename = argv[2];
         bool error = read_links_from_file(filename, links);
@@ -277,6 +289,7 @@ int main(int argc, char** argv)
     }
 
     HANDLE statsThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
+    p.active_threads = threads;
 
     for (int i = 0; i < threads; i++)
     {
@@ -301,7 +314,8 @@ int main(int argc, char** argv)
    DeleteCriticalSection(&queueCriticalSection);
    DeleteCriticalSection(&hostCriticalSection);
    DeleteCriticalSection(&ipCriticalSection);
-    
+   DeleteCriticalSection(&activeThreadsCriticalSection);
+   
    WSACleanup();
 }
 
