@@ -205,7 +205,7 @@ UINT stats_thread(LPVOID pParam)
         small_start = clock();
     }
 
-    int elapsed_time = clock() - start;
+    int elapsed_time = (clock() - start) / 1000;
 
     printf("Extracted %d URLS @ %d/s\n", p->extracted_urls, p->extracted_urls / elapsed_time);
     printf("Looked up %d DNS names @ %d/s\n", p->dns_lookups, p->dns_lookups / elapsed_time);
