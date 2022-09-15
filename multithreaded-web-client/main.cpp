@@ -116,9 +116,9 @@ void crawl(Parameters*p, char* link) {
                 EnterCriticalSection(&statsCriticalSection);
                 if (code >= 200 && code < 300) p->status_codes[0]++;
                 else if (code >= 300 && code < 400) p->status_codes[1]++;
-                if (code >= 400 && code < 500) p->status_codes[2]++;
-                if (code >= 500 && code < 600) p->status_codes[3]++;
-                else if(code != -1) p->status_codes[4]++;
+                else if (code >= 400 && code < 500) p->status_codes[2]++;
+                else if (code >= 500 && code < 600) p->status_codes[3]++;
+                else if (code != -1) p->status_codes[4]++;                
                 p->pages++;
                 p->bytes += obj.get_buffer_size;
                 LeaveCriticalSection(&statsCriticalSection);
