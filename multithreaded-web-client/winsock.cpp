@@ -331,7 +331,7 @@ int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method,
 
 	if (status_code < status_code_validation || status_code >= status_code_validation + 100) {
 		error = true;
-		return -1;
+		return status_code;
 	}
 
 	return status_code;
