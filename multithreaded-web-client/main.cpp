@@ -252,17 +252,27 @@ bool read_links_from_file(char* filename, queue<char*>&links) {
 
 int main(int argc, char** argv)
 {
-    queue<char*>links;
-    HANDLE* handles = NULL;
-    int threads;
-    Parameters p;
+    WSADATA wsaData;
+
+    //Initialize WinSock; once per program run 
+    WORD wVersionRequested = MAKEWORD(2, 2);
+    if (WSAStartup(wVersionRequested, &wsaData) != 0) {
+        printf("WSAStartup failed with %d\n", WSAGetLastError());
+        WSACleanup();
+        return 0;
+    }
 
     if (argc == 2) {
         char* a = argv[1];
-        links.push(a);
+        printf(a);
     }
     else if (argc == 3)
     {
+        queue<char*>links;
+        HANDLE* handles = NULL;
+        int threads;
+        Parameters p;
+
         char* temp = argv[1];
         threads = atoi(temp);
         if (threads < 1) {
@@ -291,42 +301,31 @@ int main(int argc, char** argv)
         p.status_codes = { 0,0,0,0,0 };
         p.pages = 0;
         p.eventQuit = CreateEvent(NULL, true, false, NULL);
+
+        HANDLE stats_thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
+        p.active_threads = threads;
+
+        for (int i = 0; i < threads; i++)
+        {
+            handles[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)crawling_thread, &p, 0, NULL);
+        }
+        // make sure this thread hangs here until the other three quit; otherwise, the program will terminate prematurely
+        for (int i = 0; i < threads; i++)
+        {
+            WaitForSingleObject(handles[i], INFINITE);
+            CloseHandle(handles[i]);
+        }
+
+        SetEvent(p.eventQuit);
+
+        WaitForSingleObject(stats_thread_handle, INFINITE);
+        CloseHandle(stats_thread_handle);
     }
     else {
         printf("Please pass only URL in format -> scheme://host[:port][/path][?query][#fragment]\n");
         printf("OR\n");
         printf("Please pass only 1 thread and name of file as 2 arguments\n");
-        return 0;
     }
-
-    WSADATA wsaData;
-
-    //Initialize WinSock; once per program run 
-    WORD wVersionRequested = MAKEWORD(2, 2);
-    if (WSAStartup(wVersionRequested, &wsaData) != 0) {
-        printf("WSAStartup failed with %d\n", WSAGetLastError());
-        WSACleanup();
-        return 0;
-    }
-
-    HANDLE stats_thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
-    p.active_threads = threads;
-
-    for (int i = 0; i < threads; i++)
-    {
-        handles[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)crawling_thread, &p, 0, NULL);
-    }
-    // make sure this thread hangs here until the other three quit; otherwise, the program will terminate prematurely
-    for (int i = 0; i < threads; i++)
-    {
-        WaitForSingleObject(handles[i], INFINITE);
-        CloseHandle(handles[i]);
-    }
-
-    SetEvent(p.eventQuit);
-
-    WaitForSingleObject(stats_thread_handle, INFINITE);
-    CloseHandle(stats_thread_handle);
 
    DeleteCriticalSection(&queueCriticalSection);
    DeleteCriticalSection(&hostCriticalSection);
