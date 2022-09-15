@@ -85,7 +85,7 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
 
                 if (obj.print) printf("\tChecking IP uniqueness...");
                 EnterCriticalSection(&ipCriticalSection);
-                auto ip_result = p->seen_IP.insert(IP);
+                auto ip_result = p->seen_IP.insert(inet_addr(inet_ntoa(obj.server.sin_addr)));
                 LeaveCriticalSection(&ipCriticalSection);
 
                 if (ip_result.second == true)
