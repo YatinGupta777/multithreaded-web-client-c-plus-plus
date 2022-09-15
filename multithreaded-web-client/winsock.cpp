@@ -49,8 +49,10 @@ void WebScrapping::DNS_LOOKUP(char* host, int port, DWORD& IP) {
 			error = true;
 			return;
 		}
-		else // take the first IP address and copy into sin_addr
+		else { // take the first IP address and copy into sin_addr
 			memcpy((char*)&(server.sin_addr), remote->h_addr, remote->h_length);
+			IP = (DWORD) remote->h_addr_list[0];
+		}
 	}
 	else
 	{
