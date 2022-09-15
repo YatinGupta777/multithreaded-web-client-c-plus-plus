@@ -107,11 +107,10 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
                 LeaveCriticalSection(&statsCriticalSection);
             }
 
-            EnterCriticalSection(&statsCriticalSection);
-            p->robot_checks++;
-            LeaveCriticalSection(&statsCriticalSection);
-
             if (!obj.error) {
+                EnterCriticalSection(&statsCriticalSection);
+                p->robot_checks++;
+                LeaveCriticalSection(&statsCriticalSection);
                 int code = obj.get_request(port, host, path, query, original_link);
                 EnterCriticalSection(&statsCriticalSection);
                 if (code >= 200 && code < 300) p->status_codes[0]++;
