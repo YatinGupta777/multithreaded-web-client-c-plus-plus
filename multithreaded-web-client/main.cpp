@@ -36,7 +36,7 @@ public:
     int bytes;
 };
 
-void crawl(Parameters*p, char* link) {
+void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
    
     WebScrapping obj;
     int length = strlen(link) + 1;
@@ -125,7 +125,7 @@ void crawl(Parameters*p, char* link) {
             }
 
             if (!obj.error) {
-                int nlinks = obj.parse_response(original_link);
+                int nlinks = obj.parse_response(original_link, parser);
                 p->total_links_found += nlinks;
             }
         }
@@ -146,6 +146,7 @@ void crawl(Parameters*p, char* link) {
 UINT crawling_thread(LPVOID pParam)
 {
     Parameters* p = ((Parameters*)pParam);
+    HTMLParserBase* parser = new HTMLParserBase;
 
     while (true)
     {
@@ -160,8 +161,10 @@ UINT crawling_thread(LPVOID pParam)
         char* link = p->links.front();
         p->links.pop();
         LeaveCriticalSection(&queueCriticalSection);
-        crawl(p, link);
+        crawl(p, link, parser);
     }
+
+    delete parser;
 
     return 0;
 }

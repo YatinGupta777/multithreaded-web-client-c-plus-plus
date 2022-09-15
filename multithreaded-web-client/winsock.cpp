@@ -7,7 +7,7 @@
 #pragma comment(lib, "ws2_32.lib")
 #define INITIAL_BUF_SIZE 4096
 
-int html_parser(char* html_code, char* link, int html_content_length);
+int html_parser(char* html_code, char* link, int html_content_length, HTMLParserBase*& parser);
 
 WebScrapping :: WebScrapping(){
 	get_buffer = NULL;
@@ -346,7 +346,7 @@ int WebScrapping::get_request(int port, char* host, char* path, char* query, cha
 	return -1;
 }
 
-int  WebScrapping::parse_response(char* link) {
+int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
 	
 	char* html_content = strstr(get_buffer, "\r\n\r\n");
 	int html_content_length = 0;
@@ -360,7 +360,7 @@ int  WebScrapping::parse_response(char* link) {
 	char* header_response = new char[header_length + 1];
 	memcpy(header_response, get_buffer, header_length);
 	header_response[header_length] = '\0';
-	int nlinks = html_parser(html_content, link, html_content_length);
+	int nlinks = html_parser(html_content, link, html_content_length, parser);
 	if (print) printf("\t+ Parsing page... ");
 	start_t = clock();
 	end_t = clock();
