@@ -31,7 +31,7 @@ void WebScrapping::cleanup(HANDLE event, SOCKET sock)
 	closesocket(sock);
 }
 
-void WebScrapping::DNS_LOOKUP(char* host, int port, DWORD& IP) {
+void WebScrapping::DNS_LOOKUP(char* host, int port) {
 	start_t = clock();
 	if (print) printf("\tDoing DNS... ");
 
@@ -39,7 +39,7 @@ void WebScrapping::DNS_LOOKUP(char* host, int port, DWORD& IP) {
 	struct hostent* remote;
 
 	// first assume that the string is an IP address
-	IP = inet_addr(host);
+	DWORD IP = inet_addr(host);
 	if (IP == INADDR_NONE)
 	{
 		// if not a valid IP, then do a DNS lookup

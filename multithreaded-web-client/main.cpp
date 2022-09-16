@@ -75,7 +75,7 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
             LeaveCriticalSection(&statsCriticalSection);
             if (obj.print) printf("passed\n");
             DWORD IP;
-            obj.DNS_LOOKUP(host, port, IP);
+            obj.DNS_LOOKUP(host, port);
             
             if (!obj.error) {
 
@@ -263,8 +263,30 @@ int main(int argc, char** argv)
     }
 
     if (argc == 2) {
-        char* a = argv[1];
-        printf(a);
+        char* link = argv[1];
+        printf("%s\n", link);
+        WebScrapping obj;
+        obj.print = true;
+        int length = strlen(link) + 1;
+        char* original_link = new char[length];
+        strcpy_s(original_link, length, link);
+
+        char* host = NULL;
+        char* fragment = NULL;
+        char* query = NULL;
+        char* path = NULL;
+        char* port_string = NULL;
+        int port = 0;
+
+        bool success = obj.clean_url(fragment, query, path, port_string, port, host, link);
+        if (success) {
+            printf("%s %s\n", host, path);
+            obj.DNS_LOOKUP(host, port);
+            int code = obj.get_request(port, host, path, query, original_link);
+
+            HTMLParserBase* parser = new HTMLParserBase;
+            int nlinks = obj.parse_response(original_link, parser);
+        }
     }
     else if (argc == 3)
     {

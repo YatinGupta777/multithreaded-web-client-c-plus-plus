@@ -22,7 +22,7 @@ public:
 	SOCKET connect_socket(char* host, int port, const char* method);
 	void head_request(int port, char* host, char* path, char* query, char* link);
 	int get_request(int port, char* host, char* path, char* query, char* link);
-	void DNS_LOOKUP(char* host, int port, DWORD& IP);
+	void DNS_LOOKUP(char* host, int port);
 	int parse_response(char* link, HTMLParserBase*& parser);
 	void read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr_pos, int max_size);
 	bool clean_url(char*& fragment, char*& query, char*& path, char*& port_string, int& port, char*& host, char* link);
