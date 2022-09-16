@@ -371,7 +371,7 @@ int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
 
 	char* transfer_encoding = StrStrIA(header_response, "transfer-encoding: chunked");
 	if (transfer_encoding != NULL) {
-		printf("\nbody size %d\n", strlen(html_content));
+		printf("\tDechunking... body size was %d", html_content_length);
 
 		char* prev = html_content;
 		char* running_pointer = strstr(prev, "\r\n");
@@ -408,8 +408,9 @@ int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
 		}
 
 		html_content[total_body_bytes] = '\0';
-		printf(html_content);
+		//printf(html_content);
 		html_content_length = total_body_bytes;
+		printf(", now %d\n", html_content_length);
 
 	}
 
