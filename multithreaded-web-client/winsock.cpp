@@ -256,15 +256,15 @@ SOCKET WebScrapping::connect_socket(char* host, int port, const char* method) {
 	return sock;
 }
 
-int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &curr_pos, int max_size)
+int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &curr_pos, int max_size, const char* http_version = "HTTP/1.0")
 {
 	start_t = clock();
 
 	int request_size = MAX_REQUEST_LEN;
 	char* request = new char[request_size];
 
-	sprintf_s(request, request_size, "%s %s%s HTTP/1.0\r\nHost:%s\r\nUser-agent: Yat/2.0\r\nConnection: close\r\n\r\n", method, path, query, host);
-
+	sprintf_s(request, request_size, "%s %s%s %s\r\nHost:%s\r\nUser-agent: Yat/2.0\r\nConnection: close\r\n\r\n", method, path, query, http_version, host);
+		
 	SOCKET sock = connect_socket(host, port, method);
 
 	if (error) return -1;
@@ -348,6 +348,11 @@ int WebScrapping::get_request(int port, char* host, char* path, char* query, cha
 	return -1;
 }
 
+int WebScrapping::get_request_HTTP_1(int port, char* host, char* path, char* query, char* link) {
+	if (!error) return connect_and_parse(get_buffer, port, "GET", host, path, query, link, 200, get_buffer_size, 2000000, "HTTP/1.1");
+	return -1;
+}
+
 int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
 	
 	char* html_content = strstr(get_buffer, "\r\n\r\n");
@@ -393,3 +398,4 @@ int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
 //http://xyz.com:/
 //https://yahoo.com/
 //http://info.cern.ch/
+//http://anglesharp.azurewebsites.net/Chunked

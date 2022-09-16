@@ -282,7 +282,7 @@ int main(int argc, char** argv)
         if (success) {
             printf("%s %s\n", host, path);
             obj.DNS_LOOKUP(host, port);
-            int code = obj.get_request(port, host, path, query, original_link);
+            int code = obj.get_request_HTTP_1(port, host, path, query, original_link);
 
             HTMLParserBase* parser = new HTMLParserBase;
             int nlinks = obj.parse_response(original_link, parser);
