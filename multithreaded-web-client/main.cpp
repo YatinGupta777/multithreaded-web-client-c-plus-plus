@@ -243,7 +243,7 @@ bool read_links_from_file(char* filename, queue<char*>&links) {
     file.seekg(0, ios::end);
     int file_size = file.tellg();
 
-    printf("Opened %s with size %d\n", filename, file_size);
+    //printf("Opened %s with size %d\n", filename, file_size);
 
     file.close();
 

@@ -39,4 +39,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="5000-Threads-Trace-URL-input-1M-2019.txt.txt" />
+    <Text Include="5000-threads-URL-input-1M.txt" />
+  </ItemGroup>
 </Project>
