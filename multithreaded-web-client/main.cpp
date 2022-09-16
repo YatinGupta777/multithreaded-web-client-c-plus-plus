@@ -205,7 +205,7 @@ UINT stats_thread(LPVOID pParam)
 
         float speed = (((float)bytes * 8.0 / 1000000.0)) / (float) d;
         printf("[%3d] %d Q %6d E %7d H %6d D %6d I %5d R %5d C %5d L %4dK\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips, robot_checks, crawled_urls, total_links_found);
-        printf("*** crawling %d pps @ %.2f Mbps\n", pages, bytes, pages / d, speed);
+        printf("*** crawling %d pps @ %.2f Mbps\n", pages / d, speed);
         small_start = clock();
     }
 
