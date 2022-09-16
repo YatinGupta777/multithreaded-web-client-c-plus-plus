@@ -353,6 +353,75 @@ int WebScrapping::get_request_HTTP_1(int port, char* host, char* path, char* que
 	return -1;
 }
 
+int WebScrapping::parseHTTP(char* link, HTMLParserBase*& parser) {
+
+	char* html_content = strstr(get_buffer, "\r\n\r\n");
+	int html_content_length = 0;
+	int header_length = get_buffer_size;
+
+	if (html_content != NULL) {
+		html_content += 4;
+		header_length = html_content - get_buffer;
+		html_content_length = get_buffer_size - header_length;
+	}
+
+	char* header_response = new char[header_length + 1];
+	memcpy(header_response, get_buffer, header_length);
+	header_response[header_length] = '\0';
+
+	/*printf("\n%s\n", header_response);
+	char* t = StrStrIA(header_response, "transfer-encoding: chunked");
+	printf("\n Transfer %s\n", t);
+	printf("\n%s\n", header_response);*/
+
+	printf("\nbody size %d\n", strlen(html_content));
+	
+	char* prev = html_content;
+	char* running_pointer = strstr(prev, "\r\n");
+
+	int hex_length = running_pointer - html_content;
+	char* hex = new char[hex_length +1];
+	memcpy(hex, html_content, hex_length);
+	hex[hex_length] = '\0';
+
+	int len = (int)strtol(hex, NULL, 16);
+
+	int total_body_bytes = 0;
+	while (len > 0)
+	{
+		total_body_bytes += len;
+		running_pointer += 2 + len + 2;
+		prev = running_pointer;
+
+		running_pointer = strstr(running_pointer, "\r\n");
+
+		hex_length = running_pointer - prev;
+		
+		char* hex = new char[hex_length + 1];
+		memcpy(hex, prev, hex_length);
+		hex[hex_length] = '\0';
+		len = (int)strtol(hex, NULL, 16);
+
+		printf("\n%d  %s  %d\n", hex_length, hex, len);
+
+		/*char* x = new char[l + 1];
+		memcpy(x, html_content, l);
+		x[l] = '\0';
+		len = (int)strtol(x, NULL, 16);
+
+		printf("%d  %s  %d", l, x, len);*/
+	}
+
+	printf("\n  %d  AAAA\n", total_body_bytes);
+
+	int nlinks = html_parser(html_content, link, html_content_length, parser);
+	if (print) printf("\t+ Parsing page... ");
+	start_t = clock();
+	end_t = clock();
+	if (print) printf("done in %d ms with %d links\n", (end_t - start_t), nlinks);
+	return nlinks;
+}
+
 int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
 	
 	char* html_content = strstr(get_buffer, "\r\n\r\n");

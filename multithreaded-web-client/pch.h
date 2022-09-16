@@ -21,5 +21,6 @@
 #include <string>
 #include <iostream>
 #include <set>
+#include<shlwapi.h>
 
 #endif //PCH_H
