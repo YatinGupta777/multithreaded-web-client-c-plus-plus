@@ -35,6 +35,7 @@ public:
     int pages;
     int bytes;
     int total_bytes;
+    vector<int>total_tamu_links;
 };
 
 void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
@@ -127,6 +128,11 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
             if (!obj.error) {
                 int nlinks = obj.parse_response(original_link, parser);
                 p->total_links_found += nlinks;
+
+                //TAMU hosts
+                if (strlen(host) >= 8 && strcmp(host + strlen(host) - 8, "tamu.edu") == 0) p->total_tamu_links[0] += obj.tamu_links;
+                //NON TAMU hosts
+                else p->total_tamu_links[1] += obj.tamu_links;
             }
         }
         else {
@@ -219,7 +225,7 @@ UINT stats_thread(LPVOID pParam)
     printf("Crawled %d pages @ %d/s (%.2f MB)\n", p->status_codes[0], p->status_codes[0] / elapsed_time, (float)p->total_bytes/1000000.0 );
     printf("Parsed %d links @ %d/s\n", p->total_links_found, p->total_links_found / elapsed_time);
     printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
-
+    printf("TAMU Hosts links %d, NON TAMU hosts links %d", p->total_tamu_links[0], p->total_tamu_links[1]);
     return 0;
 }
 
@@ -325,6 +331,7 @@ int main(int argc, char** argv)
         p.pages = 0;
         p.bytes = 0;
         p.total_bytes = 0;
+        p.total_tamu_links = { 0,0 };
         p.eventQuit = CreateEvent(NULL, true, false, NULL);
 
         HANDLE stats_thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);

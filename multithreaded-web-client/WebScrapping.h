@@ -13,6 +13,7 @@ public:
 	char* head_buffer;
 	int head_buffer_size;
 	struct sockaddr_in server;
+	int tamu_links;
 	clock_t start_t;
 	clock_t end_t;
 	bool error;
