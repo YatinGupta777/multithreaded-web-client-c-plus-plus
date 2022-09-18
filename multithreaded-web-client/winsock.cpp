@@ -152,8 +152,10 @@ void WebScrapping::read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr
 	while (1)
 	{
 		int time_remaining = time_ends - clock();
+
+		if (is_part_one) time_remaining = 10000;
 		 
-		if (time_remaining < 0 && !is_part_one) {
+		if (time_remaining < 0) {
 			if (print) ("failed with timeout\n");
 			error = true;
 			return;
