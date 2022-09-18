@@ -256,7 +256,7 @@ SOCKET WebScrapping::connect_socket(char* host, int port, const char* method) {
 	return sock;
 }
 
-int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &curr_pos, int max_size, const char* http_version = "HTTP/1.0")
+int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &curr_pos, int max_size, const char* http_version)
 {
 	start_t = clock();
 
@@ -264,7 +264,7 @@ int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method,
 	char* request = new char[request_size];
 
 	sprintf_s(request, request_size, "%s %s%s %s\r\nHost:%s\r\nUser-agent: Yat/2.0\r\nConnection: close\r\n\r\n", method, path, query, http_version, host);
-		
+
 	SOCKET sock = connect_socket(host, port, method);
 
 	if (error) return -1;
@@ -353,7 +353,7 @@ int WebScrapping::get_request_HTTP_1(int port, char* host, char* path, char* que
 	return -1;
 }
 
-int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
+int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser, bool dechunk) {
 	
 	char* html_content = strstr(get_buffer, "\r\n\r\n");
 	int html_content_length = 0;
@@ -370,7 +370,7 @@ int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
 	header_response[header_length] = '\0';
 
 	char* transfer_encoding = StrStrIA(header_response, "transfer-encoding: chunked");
-	if (transfer_encoding != NULL) {
+	if (dechunk && transfer_encoding != NULL) {
 		printf("\tDechunking... body size was %d", html_content_length);
 
 		char* prev = html_content;

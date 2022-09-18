@@ -283,7 +283,7 @@ int main(int argc, char** argv)
             int code = obj.get_request_HTTP_1(port, host, path, query, original_link);
 
             HTMLParserBase* parser = new HTMLParserBase;
-            int nlinks = obj.parse_response(original_link, parser);
+            int nlinks = obj.parse_response(original_link, parser, true);
         }
     }
     else if (argc == 3)
