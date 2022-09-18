@@ -14,6 +14,7 @@ WebScrapping :: WebScrapping(){
 	head_buffer = NULL;
 	error = false;
 	print = false;
+	is_part_one = false;
 	get_buffer_size = 0;
 	head_buffer_size = 0;
 	tamu_links = 0;
@@ -152,7 +153,7 @@ void WebScrapping::read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr
 	{
 		int time_remaining = time_ends - clock();
 		 
-		if (time_remaining < 0) {
+		if (time_remaining < 0 && !is_part_one) {
 			if (print) ("failed with timeout\n");
 			error = true;
 			return;
@@ -192,7 +193,7 @@ void WebScrapping::read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr
 
 			curr_pos += bytes_received;
 
-			if (curr_pos > max_size) {
+			if (curr_pos > max_size && !is_part_one) {
 				if (print) printf("failed with exceeding max\n");
 				error = true;
 				return;

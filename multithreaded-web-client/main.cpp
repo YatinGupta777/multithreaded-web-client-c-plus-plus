@@ -283,6 +283,7 @@ int main(int argc, char** argv)
     if (argc == 2) {
         char* link = argv[1];
         WebScrapping obj;
+        obj.is_part_one = true;
         obj.print = true;
         int length = strlen(link) + 1;
         char* original_link = new char[length];
@@ -298,10 +299,12 @@ int main(int argc, char** argv)
         bool success = obj.clean_url(fragment, query, path, port_string, port, host, link);
         if (success) {
             obj.DNS_LOOKUP(host, port);
-            int code = obj.get_request_HTTP_1(port, host, path, query, original_link);
-
-            HTMLParserBase* parser = new HTMLParserBase;
-            int nlinks = obj.parse_response(original_link, parser, true);
+            if(!obj.error) obj.get_request_HTTP_1(port, host, path, query, original_link);
+            if (!obj.error) {
+                HTMLParserBase* parser = new HTMLParserBase;
+                obj.parse_response(original_link, parser, true);
+                delete parser;
+            }
         }
     }
     else if (argc == 3)
