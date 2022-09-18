@@ -188,14 +188,11 @@ UINT crawling_thread(LPVOID pParam)
 UINT stats_thread(LPVOID pParam)
 {
     Parameters* p = ((Parameters*)pParam);
-    clock_t start, small_start, small_end;
+    clock_t start;
     start = clock();
-    small_start = clock();
     while (WaitForSingleObject(p->eventQuit, 2000) == WAIT_TIMEOUT)
     {
-        small_end = clock();
-        int d = (small_end - small_start) / 1000;
-
+        int d = 2000;
         EnterCriticalSection(&queueCriticalSection);
         int size = p->links.size();
         LeaveCriticalSection(&queueCriticalSection);
@@ -224,7 +221,6 @@ UINT stats_thread(LPVOID pParam)
         float speed = (((float)bytes * 8.0 / 1000000.0)) / (float) d;
         printf("[%3d] %d Q %6d E %7d H %6d D %6d I %5d R %5d C %5d L %4dK\n", elapsed_time/1000, active_threads, size, extracted_urls, unique_hosts, dns_lookups, unique_ips, robot_checks, crawled_urls, total_links_found);
         printf("*** crawling %d pps @ %.2f Mbps\n", pages / d, speed);
-        small_start = clock();
     }
 
     int elapsed_time = (clock() - start) / 1000;
