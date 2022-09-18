@@ -107,7 +107,7 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
             if (!obj.error) {
                 obj.head_request(port, host, head_path, head_query, original_link);
                 EnterCriticalSection(&statsCriticalSection);
-                //p->bytes += obj.head_buffer_size;
+                p->bytes += obj.head_buffer_size;
                 LeaveCriticalSection(&statsCriticalSection);
             }
 
@@ -228,8 +228,6 @@ UINT stats_thread(LPVOID pParam)
     }
 
     int elapsed_time = (clock() - start) / 1000;
-
-    printf("BYTES %d\n", p->total_bytes);
 
     printf("Extracted %d URLS @ %d/s\n", p->extracted_urls, p->extracted_urls / elapsed_time);
     printf("Looked up %d DNS names @ %d/s\n", p->unique_hosts, p->unique_hosts / elapsed_time);
