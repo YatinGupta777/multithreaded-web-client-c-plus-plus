@@ -34,6 +34,7 @@ public:
     HANDLE	eventQuit;
     int pages;
     int bytes;
+    int total_bytes;
 };
 
 void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
@@ -194,6 +195,7 @@ UINT stats_thread(LPVOID pParam)
         int total_links_found = p->total_links_found;
         int pages = p->pages;
         int bytes = p->bytes;
+        p->total_bytes += bytes;
         p->pages = 0;
         p->bytes = 0;
         LeaveCriticalSection(&statsCriticalSection);
@@ -214,7 +216,7 @@ UINT stats_thread(LPVOID pParam)
     printf("Extracted %d URLS @ %d/s\n", p->extracted_urls, p->extracted_urls / elapsed_time);
     printf("Looked up %d DNS names @ %d/s\n", p->unique_hosts, p->unique_hosts / elapsed_time);
     printf("Attempted %d robots @ %d/s\n", p->unique_ips, p->unique_ips / elapsed_time);
-    printf("Crawled %d pages @ %d/s\n", p->status_codes[0], p->status_codes[0] / elapsed_time);
+    printf("Crawled %d pages @ %d/s (%.2f MB)\n", p->status_codes[0], p->status_codes[0] / elapsed_time, (float)p->total_bytes/1000000.0 );
     printf("Parsed %d links @ %d/s\n", p->total_links_found, p->total_links_found / elapsed_time);
     printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
 
@@ -311,6 +313,7 @@ int main(int argc, char** argv)
         char* filename = argv[2];
         bool error = read_links_from_file(filename, links);
         if(error) return 0;
+        p.active_threads = 0;
         p.links = links;
         p.extracted_urls = 0;
         p.unique_hosts = 0;
@@ -320,6 +323,8 @@ int main(int argc, char** argv)
         p.total_links_found = 0;
         p.status_codes = { 0,0,0,0,0 };
         p.pages = 0;
+        p.bytes = 0;
+        p.total_bytes = 0;
         p.eventQuit = CreateEvent(NULL, true, false, NULL);
 
         HANDLE stats_thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
