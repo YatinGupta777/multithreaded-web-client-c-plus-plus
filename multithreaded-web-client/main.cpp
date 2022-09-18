@@ -36,6 +36,8 @@ public:
     int bytes;
     int total_bytes;
     vector<int>total_tamu_links;
+    int tamu_domain;
+    int non_tamu_domain;
 };
 
 void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
@@ -126,13 +128,21 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
             }
 
             if (!obj.error) {
+                EnterCriticalSection(&statsCriticalSection);
                 int nlinks = obj.parse_response(original_link, parser);
                 p->total_links_found += nlinks;
-
                 //TAMU hosts
-                if (strlen(host) >= 8 && strcmp(host + strlen(host) - 8, "tamu.edu") == 0) p->total_tamu_links[0] += obj.tamu_links;
+                if (strlen(host) >= 8 && strcmp(host + strlen(host) - 8, "tamu.edu") == 0) {
+
+                    if (obj.tamu_links > 0) p->tamu_domain++;
+                    p->total_tamu_links[0] += obj.tamu_links;
+                }
                 //NON TAMU hosts
-                else p->total_tamu_links[1] += obj.tamu_links;
+                else {
+                    p->total_tamu_links[1] += obj.tamu_links;
+                    if (obj.tamu_links > 0) p->non_tamu_domain++;
+                }
+                LeaveCriticalSection(&statsCriticalSection);
             }
         }
         else {
@@ -332,6 +342,8 @@ int main(int argc, char** argv)
         p.bytes = 0;
         p.total_bytes = 0;
         p.total_tamu_links = { 0,0 };
+        p.tamu_domain = 0;
+        p.non_tamu_domain = 0;
         p.eventQuit = CreateEvent(NULL, true, false, NULL);
 
         HANDLE stats_thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
