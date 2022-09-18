@@ -193,6 +193,9 @@ UINT stats_thread(LPVOID pParam)
     small_start = clock();
     while (WaitForSingleObject(p->eventQuit, 2000) == WAIT_TIMEOUT)
     {
+        small_end = clock();
+        int d = (small_end - small_start) / 1000;
+
         EnterCriticalSection(&queueCriticalSection);
         int size = p->links.size();
         LeaveCriticalSection(&queueCriticalSection);
@@ -215,9 +218,6 @@ UINT stats_thread(LPVOID pParam)
         p->pages = 0;
         p->bytes = 0;
         LeaveCriticalSection(&statsCriticalSection);
-
-        small_end = clock();
-        int d = (small_end - small_start) / 1000;
 
         total_links_found = ceil(total_links_found / 1000);
 
