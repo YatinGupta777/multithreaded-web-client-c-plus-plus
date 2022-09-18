@@ -188,15 +188,19 @@ UINT crawling_thread(LPVOID pParam)
 UINT stats_thread(LPVOID pParam)
 {
     Parameters* p = ((Parameters*)pParam);
-    clock_t start;
+    clock_t start, small_start, small_end;;
     start = clock();
+    small_start = clock();
     while (WaitForSingleObject(p->eventQuit, 2000) == WAIT_TIMEOUT)
     {
-        int d = 2000;
+        small_end = clock();
+        int d = (small_end - small_start) / 1000;
+        int elapsed_time = clock() - start;
+
         EnterCriticalSection(&queueCriticalSection);
         int size = p->links.size();
         LeaveCriticalSection(&queueCriticalSection);
-        int elapsed_time = clock() - start;
+        
         EnterCriticalSection(&activeThreadsCriticalSection);
         int active_threads = p->active_threads;
         LeaveCriticalSection(&activeThreadsCriticalSection);
