@@ -212,8 +212,8 @@ UINT stats_thread(LPVOID pParam)
     int elapsed_time = (clock() - start) / 1000;
 
     printf("Extracted %d URLS @ %d/s\n", p->extracted_urls, p->extracted_urls / elapsed_time);
-    printf("Looked up %d DNS names @ %d/s\n", p->dns_lookups, p->dns_lookups / elapsed_time);
-    printf("Attempted %d robots @ %d/s\n", p->robot_checks, p->robot_checks / elapsed_time);
+    printf("Looked up %d DNS names @ %d/s\n", p->unique_hosts, p->unique_hosts / elapsed_time);
+    printf("Attempted %d robots @ %d/s\n", p->unique_ips, p->unique_ips / elapsed_time);
     printf("Crawled %d pages @ %d/s\n", p->status_codes[0], p->status_codes[0] / elapsed_time);
     printf("Parsed %d links @ %d/s\n", p->total_links_found, p->total_links_found / elapsed_time);
     printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
@@ -243,7 +243,7 @@ bool read_links_from_file(char* filename, queue<char*>&links) {
     file.seekg(0, ios::end);
     int file_size = file.tellg();
 
-    //printf("Opened %s with size %d\n", filename, file_size);
+    printf("Opened %s with size %d\n", filename, file_size);
 
     file.close();
 
@@ -253,7 +253,7 @@ bool read_links_from_file(char* filename, queue<char*>&links) {
 int main(int argc, char** argv)
 {
     WSADATA wsaData;
-
+     
     //Initialize WinSock; once per program run 
     WORD wVersionRequested = MAKEWORD(2, 2);
     if (WSAStartup(wVersionRequested, &wsaData) != 0) {
@@ -264,7 +264,6 @@ int main(int argc, char** argv)
 
     if (argc == 2) {
         char* link = argv[1];
-        printf("%s\n", link);
         WebScrapping obj;
         obj.print = true;
         int length = strlen(link) + 1;
@@ -280,7 +279,6 @@ int main(int argc, char** argv)
 
         bool success = obj.clean_url(fragment, query, path, port_string, port, host, link);
         if (success) {
-            printf("%s %s\n", host, path);
             obj.DNS_LOOKUP(host, port);
             int code = obj.get_request_HTTP_1(port, host, path, query, original_link);
 

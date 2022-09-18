@@ -419,6 +419,10 @@ int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser) {
 	start_t = clock();
 	end_t = clock();
 	if (print) printf("done in %d ms with %d links\n", (end_t - start_t), nlinks);
+
+	if(print) printf("---------------------------------------------------------\n");
+	if(print) printf(header_response);
+
 	return nlinks;
 }
 
