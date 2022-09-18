@@ -7,11 +7,11 @@
 
 #include "pch.h"
 #include <iostream>
-#include "WebScrapping.h"
+#include "WebCrawling.h"
 
 using namespace std;
 
-class WebScrapping;
+class WebCrawling;
 CRITICAL_SECTION queueCriticalSection;
 CRITICAL_SECTION hostCriticalSection;
 CRITICAL_SECTION ipCriticalSection;
@@ -42,7 +42,7 @@ public:
 
 void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
    
-    WebScrapping obj;
+    WebCrawling obj;
     int length = strlen(link) + 1;
     char* original_link = new char[length];
     strcpy_s(original_link, length, link);
@@ -107,7 +107,7 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
             if (!obj.error) {
                 obj.head_request(port, host, head_path, head_query, original_link);
                 EnterCriticalSection(&statsCriticalSection);
-                p->bytes += obj.head_buffer_size;
+                //p->bytes += obj.head_buffer_size;
                 LeaveCriticalSection(&statsCriticalSection);
             }
 
@@ -229,6 +229,8 @@ UINT stats_thread(LPVOID pParam)
 
     int elapsed_time = (clock() - start) / 1000;
 
+    printf("BYTES %d\n", p->total_bytes);
+
     printf("Extracted %d URLS @ %d/s\n", p->extracted_urls, p->extracted_urls / elapsed_time);
     printf("Looked up %d DNS names @ %d/s\n", p->unique_hosts, p->unique_hosts / elapsed_time);
     printf("Attempted %d robots @ %d/s\n", p->unique_ips, p->unique_ips / elapsed_time);
@@ -282,7 +284,7 @@ int main(int argc, char** argv)
 
     if (argc == 2) {
         char* link = argv[1];
-        WebScrapping obj;
+        WebCrawling obj;
         obj.is_part_one = true;
         obj.print = true;
         int length = strlen(link) + 1;

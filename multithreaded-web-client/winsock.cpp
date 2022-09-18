@@ -3,13 +3,13 @@
  * by Dmitri Loguinov
  */
 #include "pch.h"
-#include "WebScrapping.h"
+#include "WebCrawling.h"
 #pragma comment(lib, "ws2_32.lib")
 #define INITIAL_BUF_SIZE 4096
 
 int html_parser(char* html_code, char* link, int html_content_length, HTMLParserBase*& parser, int& tamu_links);
 
-WebScrapping :: WebScrapping(){
+WebCrawling :: WebCrawling(){
 	get_buffer = NULL;
 	head_buffer = NULL;
 	error = false;
@@ -22,18 +22,18 @@ WebScrapping :: WebScrapping(){
 	end_t = clock();
 }
 
-WebScrapping:: ~WebScrapping() {
+WebCrawling:: ~WebCrawling() {
 	free(get_buffer);
 	free(head_buffer);
 }
 
-void WebScrapping::cleanup(HANDLE event, SOCKET sock)
+void WebCrawling::cleanup(HANDLE event, SOCKET sock)
 {
 	WSACloseEvent(event);
 	closesocket(sock);
 }
 
-void WebScrapping::DNS_LOOKUP(char* host, int port) {
+void WebCrawling::DNS_LOOKUP(char* host, int port) {
 	start_t = clock();
 	if (print) printf("\tDoing DNS... ");
 
@@ -83,7 +83,7 @@ char* extract_and_truncate(char* link, char c)
 	return result;
 }
 
-bool WebScrapping::clean_url(char*& fragment, char*& query, char*& path, char*& port_string, int& port, char*& host, char* link)
+bool WebCrawling::clean_url(char*& fragment, char*& query, char*& path, char*& port_string, int& port, char*& host, char* link)
 {
 	if (strlen(link) > MAX_URL_LEN) {
 		if (print) printf("URL length exceeds the maximum allowed length %d\n", MAX_URL_LEN);
@@ -141,7 +141,7 @@ bool WebScrapping::clean_url(char*& fragment, char*& query, char*& path, char*& 
 }
 
 
-void WebScrapping::read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr_pos, int max_size) {
+void WebCrawling::read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr_pos, int max_size) {
 	WSANETWORKEVENTS network_events;
 
 	int allocated_size = INITIAL_BUF_SIZE;
@@ -226,7 +226,7 @@ void WebScrapping::read_data(HANDLE event, SOCKET sock, char*& buffer, int& curr
 	}
 }
 
-SOCKET WebScrapping::connect_socket(char* host, int port, const char* method) {
+SOCKET WebCrawling::connect_socket(char* host, int port, const char* method) {
 	// open a TCP socket
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sock == INVALID_SOCKET)
@@ -260,7 +260,7 @@ SOCKET WebScrapping::connect_socket(char* host, int port, const char* method) {
 	return sock;
 }
 
-int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &curr_pos, int max_size, const char* http_version)
+int WebCrawling::connect_and_parse(char*& buffer, int port, const char* method, char* host, char* path, char* query, char* link, int status_code_validation, int &curr_pos, int max_size, const char* http_version)
 {
 	start_t = clock();
 
@@ -343,21 +343,21 @@ int WebScrapping::connect_and_parse(char*& buffer, int port, const char* method,
 	return status_code;
 }
 
-void WebScrapping::head_request(int port, char* host, char* path, char* query, char* link) {
+void WebCrawling::head_request(int port, char* host, char* path, char* query, char* link) {
 	if(!error) connect_and_parse(head_buffer, port, "HEAD", host, path, query, link, 400, head_buffer_size, 16000);
 }
 
-int WebScrapping::get_request(int port, char* host, char* path, char* query, char* link) {
+int WebCrawling::get_request(int port, char* host, char* path, char* query, char* link) {
 	if (!error) return connect_and_parse(get_buffer, port, "GET", host, path, query, link, 200, get_buffer_size, 2000000);
 	return -1;
 }
 
-int WebScrapping::get_request_HTTP_1(int port, char* host, char* path, char* query, char* link) {
+int WebCrawling::get_request_HTTP_1(int port, char* host, char* path, char* query, char* link) {
 	if (!error) return connect_and_parse(get_buffer, port, "GET", host, path, query, link, 200, get_buffer_size, 2000000, "HTTP/1.1");
 	return -1;
 }
 
-int  WebScrapping::parse_response(char* link, HTMLParserBase*& parser, bool dechunk) {
+int  WebCrawling::parse_response(char* link, HTMLParserBase*& parser, bool dechunk) {
 	
 	char* html_content = strstr(get_buffer, "\r\n\r\n");
 	int html_content_length = 0;

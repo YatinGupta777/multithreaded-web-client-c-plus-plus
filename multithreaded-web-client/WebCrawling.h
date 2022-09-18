@@ -1,11 +1,11 @@
 #pragma once
 #include "pch.h"
 
-class WebScrapping
+class WebCrawling
 {
 public:
-	WebScrapping();
-	~WebScrapping();
+	WebCrawling();
+	~WebCrawling();
 
 	char* get_buffer;
 	int get_buffer_size;

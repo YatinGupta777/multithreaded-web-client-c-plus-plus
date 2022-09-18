@@ -149,7 +149,7 @@
   <ItemGroup>
     <ClInclude Include="HTMLParserBase.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="WebScrapping.h" />
+    <ClInclude Include="WebCrawling.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="500-threads-URL-input-1M.txt" />
