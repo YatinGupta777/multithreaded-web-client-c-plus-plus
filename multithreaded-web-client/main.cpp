@@ -169,10 +169,7 @@ UINT crawling_thread(LPVOID pParam)
         EnterCriticalSection(&queueCriticalSection);
         if (p->links.size() == 0) {
             LeaveCriticalSection(&queueCriticalSection);
-            EnterCriticalSection(&activeThreadsCriticalSection);
-            p->active_threads--;
-            LeaveCriticalSection(&activeThreadsCriticalSection);
-            return 0;
+            break;
         }
         char* link = p->links.front();
         p->links.pop();
@@ -181,6 +178,10 @@ UINT crawling_thread(LPVOID pParam)
     }
 
     delete parser;
+
+    EnterCriticalSection(&activeThreadsCriticalSection);
+    p->active_threads--;
+    LeaveCriticalSection(&activeThreadsCriticalSection);
 
     return 0;
 }
