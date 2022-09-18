@@ -74,7 +74,7 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
             p->unique_hosts++;
             LeaveCriticalSection(&statsCriticalSection);
             if (obj.print) printf("passed\n");
-            DWORD IP;
+           
             obj.DNS_LOOKUP(host, port);
             
             if (!obj.error) {
@@ -190,7 +190,7 @@ UINT stats_thread(LPVOID pParam)
         int dns_lookups = p->dns_lookups;
         int unique_ips = p->unique_ips;
         int robot_checks = p->robot_checks;
-        int crawled_urls = p->status_codes[0];
+        int crawled_urls = p->status_codes[0] + p->status_codes[1] + p->status_codes[2] + p->status_codes[3] + p->status_codes[4];
         int total_links_found = p->total_links_found;
         int pages = p->pages;
         int bytes = p->bytes;
