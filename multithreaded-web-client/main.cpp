@@ -231,7 +231,7 @@ UINT stats_thread(LPVOID pParam)
     printf("Crawled %d pages @ %d/s (%.2f MB)\n", p->status_codes[0], p->status_codes[0] / elapsed_time, (float)p->total_bytes/1000000.0 );
     printf("Parsed %d links @ %d/s\n", p->total_links_found, p->total_links_found / elapsed_time);
     printf("HTTP codes: 2xx = %d, 3xx = %d, 4xx = %d, 5xx = %d, other = %d\n", p->status_codes[0], p->status_codes[1], p->status_codes[2], p->status_codes[3], p->status_codes[4]);
-    //printf("TAMU Hosts links %d : %d, NON TAMU hosts links %d: %d", p->tamu_domain, p->total_tamu_links[0],p->non_tamu_domain, p->total_tamu_links[1]);
+    printf("TAMU Hosts links %d : %d, NON TAMU hosts links %d: %d", p->tamu_domain, p->total_tamu_links[0],p->non_tamu_domain, p->total_tamu_links[1]);
     return 0;
 }
 
@@ -347,6 +347,8 @@ int main(int argc, char** argv)
 
         HANDLE stats_thread_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)stats_thread, &p, 0, NULL);
         p.active_threads = threads;
+
+        SetThreadPriority(stats_thread_handle, THREAD_PRIORITY_HIGHEST);
 
         for (int i = 0; i < threads; i++)
         {
