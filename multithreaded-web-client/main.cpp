@@ -198,15 +198,10 @@ UINT stats_thread(LPVOID pParam)
         int d = (small_end - small_start) / 1000;
         int elapsed_time = clock() - start;
 
-        EnterCriticalSection(&queueCriticalSection);
         int size = p->links.size();
-        LeaveCriticalSection(&queueCriticalSection);
         
-        EnterCriticalSection(&activeThreadsCriticalSection);
         int active_threads = p->active_threads;
-        LeaveCriticalSection(&activeThreadsCriticalSection);
-
-        EnterCriticalSection(&statsCriticalSection);
+        
         int extracted_urls = p->extracted_urls;
         int unique_hosts = p->unique_hosts;
         int dns_lookups = p->dns_lookups;
@@ -219,7 +214,6 @@ UINT stats_thread(LPVOID pParam)
         p->total_bytes += bytes;
         p->pages = 0;
         p->bytes = 0;
-        LeaveCriticalSection(&statsCriticalSection);
 
         total_links_found = ceil(total_links_found / 1000);
 
