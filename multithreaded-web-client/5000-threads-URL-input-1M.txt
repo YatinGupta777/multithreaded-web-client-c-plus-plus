@@ -1,74 +1,62 @@
 Opened URL-input-1M.txt with size 66152005
-[  2] 5000 Q 925009 E   74995 H  11726 D  10139 I  6940 R   642 C    43 L    0K
-*** crawling 21 pps @ 6.05 Mbps
-[  4] 5000 Q 854951 E  145053 H  21726 D  18937 I 13260 R  2109 C  1464 L   39K
-*** crawling 710 pps @ 86.56 Mbps
-[  6] 5000 Q 787301 E  212703 H  30913 D  27117 I 18958 R  3430 C  2795 L   75K
-*** crawling 666 pps @ 101.25 Mbps
-[  8] 5000 Q 725189 E  274815 H  40462 D  35516 I 24737 R  4626 C  4106 L  109K
-*** crawling 657 pps @ 110.34 Mbps
-[ 10] 5000 Q 662481 E  337523 H  51090 D  44931 I 31134 R  6009 C  5637 L  150K
-*** crawling 766 pps @ 115.00 Mbps
-[ 12] 5000 Q 602254 E  397750 H  59284 D  51443 I 35448 R  7095 C  6864 L  188K
-*** crawling 616 pps @ 99.69 Mbps
-[ 14] 5000 Q 552960 E  447044 H  65532 D  57152 I 39138 R  7763 C  7559 L  211K
-*** crawling 703 pps @ 120.96 Mbps
-[ 16] 5000 Q 511353 E  488651 H  70732 D  61735 I 42069 R  8323 C  8132 L  230K
-*** crawling 584 pps @ 114.17 Mbps
-[ 18] 5000 Q 458758 E  541246 H  76259 D  66625 I 45137 R  8914 C  8727 L  246K
-*** crawling 602 pps @ 93.46 Mbps
-[ 20] 5000 Q 422294 E  577710 H  81729 D  71439 I 48002 R  9497 C  9276 L  262K
-*** crawling 559 pps @ 85.79 Mbps
-[ 22] 5000 Q 378615 E  621389 H  87794 D  76591 I 50382 R 10031 C  9828 L  282K
-*** crawling 560 pps @ 109.47 Mbps
-[ 24] 5000 Q 328100 E  671904 H  94839 D  82547 I 52768 R 10492 C 10276 L  296K
-*** crawling 451 pps @ 69.18 Mbps
-[ 26] 5000 Q 277795 E  722209 H 102135 D  88800 I 55287 R 10994 C 10789 L  309K
-*** crawling 262 pps @ 50.82 Mbps
-[ 28] 5000 Q 228803 E  771201 H 109098 D  94738 I 57518 R 11507 C 11278 L  325K
-*** crawling 246 pps @ 38.65 Mbps
-[ 30] 5000 Q 180467 E  819537 H 116229 D 100768 I 59714 R 11943 C 11729 L  340K
-*** crawling 462 pps @ 75.33 Mbps
-[ 32] 5000 Q 128147 E  871856 H 123299 D 106603 I 61885 R 12392 C 12183 L  350K
-*** crawling 459 pps @ 62.18 Mbps
-[ 34] 5000 Q  79544 E  920459 H 130296 D 112573 I 64179 R 12874 C 12661 L  362K
-*** crawling 486 pps @ 62.28 Mbps
-[ 36] 5000 Q  29917 E  970086 H 137051 D 118255 I 66303 R 13305 C 13080 L  373K
-*** crawling 427 pps @ 62.53 Mbps
-[ 38] 3665 Q      0 E 1000003 H 139300 D 120867 I 67282 R 13580 C 13408 L  385K
-*** crawling 333 pps @ 55.19 Mbps
-[ 40] 2875 Q      0 E 1000003 H 139300 D 121142 I 67350 R 13599 C 13441 L  388K
-*** crawling 38 pps @ 13.00 Mbps
-[ 42] 2358 Q      0 E 1000003 H 139300 D 121210 I 67375 R 13608 C 13459 L  389K
-*** crawling 9 pps @ 1.31 Mbps
-[ 44] 1884 Q      0 E 1000003 H 139300 D 121236 I 67385 R 13614 C 13476 L  390K
-*** crawling 11 pps @ 2.40 Mbps
-[ 46] 1444 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13616 C 13485 L  390K
-*** crawling 7 pps @ 2.67 Mbps
-[ 48] 1127 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13487 L  390K
-*** crawling 2 pps @ 0.19 Mbps
-[ 50] 909 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13487 L  390K
+[  2] 5000 Q 937754 E   62250 H   9806 D   8084 I  5408 R   902 C   654 L   13K
+*** crawling 327 pps @ 39.53 Mbps
+[  4] 5000 Q 868766 E  131234 H  19586 D  16967 I 11774 R  2212 C  1936 L   55K
+*** crawling 641 pps @ 88.28 Mbps
+[  6] 5000 Q 797851 E  202153 H  29398 D  25666 I 17950 R  3534 C  3256 L   89K
+*** crawling 661 pps @ 110.42 Mbps
+[  8] 5000 Q 731454 E  268549 H  39339 D  34347 I 23961 R  4692 C  4465 L  118K
+*** crawling 604 pps @ 83.53 Mbps
+[ 10] 5000 Q 669644 E  330355 H  49816 D  43672 I 30278 R  5978 C  5695 L  149K
+*** crawling 1230 pps @ 195.03 Mbps
+[ 12] 5000 Q 590219 E  409785 H  60569 D  53258 I 36626 R  7217 C  6936 L  190K
+*** crawling 623 pps @ 96.95 Mbps
+[ 14] 5000 Q 509708 E  490296 H  70897 D  62328 I 42456 R  8458 C  8195 L  226K
+*** crawling 1263 pps @ 194.27 Mbps
+[ 16] 5000 Q 435592 E  564412 H  79583 D  70046 I 47252 R  9420 C  9220 L  260K
+*** crawling 1029 pps @ 190.55 Mbps
+[ 18] 5000 Q 377630 E  622374 H  87930 D  77247 I 50703 R 10197 C 10015 L  288K
+*** crawling 798 pps @ 143.50 Mbps
+[ 20] 5000 Q 317103 E  682901 H  96435 D  84594 I 53627 R 10811 C 10628 L  312K
+*** crawling 309 pps @ 63.07 Mbps
+[ 22] 5000 Q 259190 E  740814 H 104679 D  91707 I 56375 R 11373 C 11226 L  330K
+*** crawling 301 pps @ 55.16 Mbps
+[ 24] 5000 Q 187954 E  812050 H 115120 D 100816 I 59687 R 12070 C 11912 L  351K
+*** crawling 691 pps @ 120.25 Mbps
+[ 26] 5000 Q 116083 E  883919 H 124910 D 109048 I 62771 R 12715 C 12558 L  369K
+*** crawling 650 pps @ 87.06 Mbps
+[ 28] 5000 Q  47607 E  952396 H 134784 D 117443 I 65929 R 13359 C 13178 L  384K
+*** crawling 623 pps @ 82.47 Mbps
+[ 30] 4222 Q      0 E 1000003 H 139300 D 121377 I 67417 R 13742 C 13642 L  401K
+*** crawling 467 pps @ 83.35 Mbps
+[ 32] 3516 Q      0 E 1000003 H 139300 D 121400 I 67436 R 13759 C 13681 L  405K
+*** crawling 42 pps @ 35.41 Mbps
+[ 34] 2917 Q      0 E 1000003 H 139300 D 121410 I 67441 R 13765 C 13693 L  406K
+*** crawling 16 pps @ 2.03 Mbps
+[ 36] 2364 Q      0 E 1000003 H 139300 D 121413 I 67442 R 13765 C 13700 L  406K
+*** crawling 8 pps @ 4.72 Mbps
+[ 38] 1863 Q      0 E 1000003 H 139300 D 121415 I 67443 R 13766 C 13701 L  406K
+*** crawling 3 pps @ 0.58 Mbps
+[ 40] 1491 Q      0 E 1000003 H 139300 D 121415 I 67443 R 13767 C 13702 L  406K
+*** crawling 1 pps @ 0.00 Mbps
+[ 42] 1234 Q      0 E 1000003 H 139300 D 121415 I 67443 R 13767 C 13703 L  406K
+*** crawling 0 pps @ 0.12 Mbps
+[ 44] 953 Q      0 E 1000003 H 139300 D 121415 I 67443 R 13767 C 13703 L  406K
 *** crawling 0 pps @ 0.00 Mbps
-[ 52] 702 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13487 L  390K
+[ 46] 662 Q      0 E 1000003 H 139300 D 121415 I 67443 R 13767 C 13703 L  406K
 *** crawling 0 pps @ 0.00 Mbps
-[ 54] 475 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13487 L  390K
+[ 48] 334 Q      0 E 1000003 H 139300 D 121415 I 67443 R 13767 C 13703 L  406K
 *** crawling 0 pps @ 0.00 Mbps
-[ 56] 246 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13487 L  390K
+[ 50] 2 Q      0 E 1000003 H 139300 D 121415 I 67443 R 13767 C 13704 L  406K
+*** crawling 2 pps @ 1.21 Mbps
+[ 52] 1 Q      0 E 1000003 H 139300 D 121415 I 67443 R 13767 C 13704 L  406K
 *** crawling 0 pps @ 0.00 Mbps
-[ 58] 20 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13488 L  391K
-*** crawling 1 pps @ 0.60 Mbps
-[ 60] 10 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13488 L  391K
-*** crawling 0 pps @ 0.00 Mbps
-[ 62] 6 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13488 L  391K
-*** crawling 0 pps @ 0.00 Mbps
-[ 64] 2 Q      0 E 1000003 H 139300 D 121253 I 67391 R 13617 C 13488 L  391K
-*** crawling 0 pps @ 0.00 Mbps
-Extracted 1000003 URLS @ 15384/s
-Looked up 139300 DNS names @ 2143/s
-Attempted 67391 robots @ 1036/s
-Crawled 7618 pages @ 117/s (269.32 MB)
-Parsed 391021 links @ 6015/s
-HTTP codes: 2xx = 7618, 3xx = 2186, 4xx = 3529, 5xx = 155, other = 0
+Extracted 1000003 URLS @ 19230/s
+Looked up 139300 DNS names @ 2678/s
+Attempted 67443 robots @ 1296/s
+Crawled 13704 pages @ 148/s (276.89 MB)
+Parsed 406983 links @ 7826/s
+HTTP codes: 2xx = 7737, 3xx = 2220, 4xx = 3588, 5xx = 159, other = 0
 
-C:\Users\yatingupta\source\repos\YatinGupta777\multithreaded-web-client-c-plus-plus\x64\Release\multithreaded-web-client.exe (process 4924) exited with code 0.
+C:\Users\yatingupta\source\repos\YatinGupta777\multithreaded-web-client-c-plus-plus\x64\Release\multithreaded-web-client.exe (process 29812) exited with code 0.
 Press any key to close this window . . .
