@@ -415,7 +415,7 @@ int  WebCrawling::parse_response(char* link, HTMLParserBase*& parser, bool dechu
 	end_t = clock();
 	if (print) printf("done in %d ms with %d links\n", (end_t - start_t), nlinks);
 
-	if(print) printf("---------------------------------------------------------\n");
+	if(print) printf("\n---------------------------------------------------------\n");
 	if(print) printf(header_response);
 
 	delete[] header_response;
