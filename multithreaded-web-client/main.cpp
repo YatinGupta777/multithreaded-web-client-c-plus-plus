@@ -227,6 +227,7 @@ UINT stats_thread(LPVOID pParam)
     int elapsed_time = (clock() - start) / 1000;
     int crawled_urls = p->status_codes[0] + p->status_codes[1] + p->status_codes[2] + p->status_codes[3] + p->status_codes[4];
 
+    printf("\n");
     printf("Extracted %d URLS @ %d/s\n", p->extracted_urls, p->extracted_urls / elapsed_time);
     printf("Looked up %d DNS names @ %d/s\n", p->unique_hosts, p->unique_hosts / elapsed_time);
     printf("Attempted %d robots @ %d/s\n", p->unique_ips, p->unique_ips / elapsed_time);
