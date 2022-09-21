@@ -45,5 +45,6 @@
   <ItemGroup>
     <Text Include="5000-threads-URL-input-1M.txt" />
     <Text Include="500-threads-URL-input-1M.txt" />
+    <Text Include="5000-threads-URL-input1M.txt" />
   </ItemGroup>
 </Project>

@@ -155,6 +155,7 @@
   <ItemGroup>
     <Text Include="500-threads-URL-input-1M.txt" />
     <Text Include="5000-threads-URL-input-1M.txt" />
+    <Text Include="5000-threads-URL-input1M.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
