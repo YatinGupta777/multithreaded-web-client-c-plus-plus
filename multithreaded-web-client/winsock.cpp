@@ -8,6 +8,7 @@
 #define INITIAL_BUF_SIZE 4096
 
 int html_parser(char* html_code, char* link, int html_content_length, HTMLParserBase*& parser, int& tamu_links);
+char* extract_and_truncate(char* link, char c);
 
 WebCrawling :: WebCrawling(){
 	get_buffer = NULL;
@@ -67,20 +68,6 @@ void WebCrawling::DNS_LOOKUP(char* host, int port) {
 	// setup the port # and protocol type
 	server.sin_family = AF_INET;
 	server.sin_port = htons(port);		// host-to-network flips the byte order
-}
-
-
-char* extract_and_truncate(char* link, char c)
-{
-	char* result = NULL;
-	char* temp = strchr(link, c);
-	if (temp != NULL) {
-		int length = strlen(temp) + 1;
-		result = new char[length];
-		strcpy_s(result, length, temp);
-		*temp = '\0';
-	}
-	return result;
 }
 
 bool WebCrawling::clean_url(char*& fragment, char*& query, char*& path, char*& port_string, int& port, char*& host, char* link)

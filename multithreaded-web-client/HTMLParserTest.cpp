@@ -3,6 +3,7 @@
 // CSCE 463 sample code
 //
 #include "pch.h"
+char* extract_and_truncate(char* link, char c);
 
 int html_parser(char* html_code, char* link, int html_content_length, HTMLParserBase*&parser, int& tamu_links)
 {
@@ -17,10 +18,25 @@ int html_parser(char* html_code, char* link, int html_content_length, HTMLParser
 
 	for (int i = 0; i < nLinks; i++)
 	{
+		char* host = NULL;
+		int length = strlen(linkBuffer) + 1;
+		host = new char[length];
+		strcpy_s(host, length, linkBuffer);
+
+		if (strncmp(host, "http://", 7) == 0)
+		{
+			host += 7;
+		}
+		else if (strncmp(host, "https://", 8) == 0) host += 8;
+	
+		extract_and_truncate(host, '#');
+		extract_and_truncate(host, '?');
+		extract_and_truncate(host, '/');
+		extract_and_truncate(host, ':');
+
 		//tamu.edu
-		if (strlen(linkBuffer) >= 8 && strcmp(linkBuffer + strlen(linkBuffer) - 8, "tamu.edu") == 0) tamu_links++;
-		//tamu.edu/
-		else if (strlen(linkBuffer) >= 9 && strcmp(linkBuffer + strlen(linkBuffer) - 9, "tamu.edu/") == 0) tamu_links++;
+		if (strlen(host) >= 8 && strcmp(host + strlen(host) - 8, "tamu.edu") == 0) tamu_links++;
+
 		linkBuffer += strlen(linkBuffer) + 1;
 	}
 	
