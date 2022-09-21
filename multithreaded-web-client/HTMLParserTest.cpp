@@ -16,6 +16,7 @@ int html_parser(char* html_code, char* link, int html_content_length, HTMLParser
 	if (nLinks < 0)
 		nLinks = 0;
 
+	/* Code for extracting TAMU links
 	for (int i = 0; i < nLinks; i++)
 	{
 		char* host = NULL;
@@ -42,7 +43,8 @@ int html_parser(char* html_code, char* link, int html_content_length, HTMLParser
 
 		linkBuffer += strlen(linkBuffer) + 1;
 	}
-	
+	*/
+
 	return nLinks;
 }
 
