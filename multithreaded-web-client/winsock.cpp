@@ -406,7 +406,7 @@ int  WebCrawling::parse_response(char* link, HTMLParserBase*& parser, bool dechu
 		//printf(html_content);
 		html_content_length = total_body_bytes;
 		printf(", now %d\n", html_content_length);
-
+		delete[] hex;
 	}
 
 	int nlinks = html_parser(html_content, link, html_content_length, parser, tamu_links);
