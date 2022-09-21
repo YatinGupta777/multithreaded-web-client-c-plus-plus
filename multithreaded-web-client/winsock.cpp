@@ -258,7 +258,10 @@ int WebCrawling::connect_and_parse(char*& buffer, int port, const char* method, 
 
 	SOCKET sock = connect_socket(host, port, method);
 
-	if (error) return -1;
+	if (error) {
+		delete[] request;
+		return -1;
+	}
 
 	int send_request = send(sock, request, (int)strlen(request), 0);
 
@@ -413,6 +416,8 @@ int  WebCrawling::parse_response(char* link, HTMLParserBase*& parser, bool dechu
 
 	if(print) printf("---------------------------------------------------------\n");
 	if(print) printf(header_response);
+
+	delete[] header_response;
 
 	return nlinks;
 }
