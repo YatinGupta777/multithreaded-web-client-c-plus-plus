@@ -157,6 +157,7 @@ void crawl(Parameters*p, char* link, HTMLParserBase*&parser) {
     delete[] original_link;
     delete[] head_path;
     delete[] head_query;
+    delete[] link;
 }
 
 UINT crawling_thread(LPVOID pParam)
