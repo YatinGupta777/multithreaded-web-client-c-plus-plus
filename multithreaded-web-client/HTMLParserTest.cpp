@@ -19,6 +19,7 @@ int html_parser(char* html_code, char* link, int html_content_length, HTMLParser
 	for (int i = 0; i < nLinks; i++)
 	{
 		char* host = NULL;
+		char* org_host = host;
 		int length = strlen(linkBuffer) + 1;
 		host = new char[length];
 		strcpy_s(host, length, linkBuffer);
@@ -36,6 +37,8 @@ int html_parser(char* html_code, char* link, int html_content_length, HTMLParser
 
 		//tamu.edu
 		if (strlen(host) >= 8 && strcmp(host + strlen(host) - 8, "tamu.edu") == 0) tamu_links++;
+
+		delete[] org_host;
 
 		linkBuffer += strlen(linkBuffer) + 1;
 	}
