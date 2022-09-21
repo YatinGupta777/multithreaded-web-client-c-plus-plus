@@ -399,6 +399,7 @@ int  WebCrawling::parse_response(char* link, HTMLParserBase*& parser, bool dechu
 			memcpy(hex, prev, hex_length);
 			hex[hex_length] = '\0';
 			len = (int)strtol(hex, NULL, 16);
+			delete[] hex;
 		}
 
 		html_content[total_body_bytes] = '\0';
